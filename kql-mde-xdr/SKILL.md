@@ -1,6 +1,8 @@
 ---
 name: kql-mde-xdr
 description: Expert in Kusto Query Language (KQL) and Microsoft Defender for Endpoint (MDE) / Microsoft 365 Defender XDR. Use when working with KQL queries, threat hunting, security investigations, writing detection rules, analyzing security data in Microsoft Sentinel, MDE, or any Microsoft XDR platform. Triggers on KQL syntax questions, threat hunting queries, detection engineering, incident investigation, or security analytics using Microsoft security tools.
+refs:
+  - references/*.md
 ---
 
 # KQL and MDE XDR Expert
@@ -22,8 +24,12 @@ description: Expert in Kusto Query Language (KQL) and Microsoft Defender for End
 | `references/alerts.md` | MS365D alert and behavior tables (AlertInfo, AlertEvidence, BehaviorInfo, BehaviorEntities) |
 | `references/identity.md` | MDA/MDI identity and cloud app tables (AAD sign-in events, IdentityInfo, IdentityLogonEvents, IdentityQueryEvents, IdentityDirectoryEvents, CloudAppEvents) |
 | `references/email.md` | MDO email security tables (EmailEvents, EmailAttachmentInfo, EmailUrlInfo, EmailPostDeliveryEvents, UrlClickEvents) |
-| `references/devices.md` | MDE device telemetry tables (DeviceInfo, DeviceProcessEvents, DeviceNetworkEvents, DeviceFileEvents, DeviceRegistryEvents, DeviceLogonEvents, DeviceEvents) |
+| `references/devices-core.md` | Core MDE device tables (DeviceInfo, DeviceNetworkInfo, DeviceProcessEvents, DeviceNetworkEvents, DeviceFileEvents) |
+| `references/devices-security.md` | Security-focused MDE tables (DeviceRegistryEvents, DeviceLogonEvents, DeviceImageLoadEvents, DeviceEvents, DeviceFileCertificateInfo) |
+| `references/devices-linux-macos.md` | Linux and macOS platform-specific guidance, ActionTypes, and detection patterns |
 | `references/tvm.md` | TVM vulnerability management tables (DeviceTvmSoftwareInventory, DeviceTvmSoftwareVulnerabilities, DeviceTvmSecureConfigurationAssessment, baseline compliance, browser extensions, hardware/firmware) |
+| `references/hunting-ioc.md` | IOC hunting patterns (hash, IP, domain), process ancestry chains, behavioral anomalies, cross-table correlation |
+| `references/hunting-mitre.md` | MITRE ATT&CK hunting queries (TA0001-TA0011: Initial Access through Exfiltration) |
 
 
 ## Query Writing Principles

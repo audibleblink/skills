@@ -2,6 +2,8 @@
 name: tmux
 description: Guide for managing terminal sessions with tmux via bash. Use when running long-lived processes, managing multiple concurrent terminal sessions, monitoring background tasks, or needing persistent shells that survive disconnection. Covers session/window/pane management, sending commands to background processes, and capturing output.
 license: Complete terms in LICENSE.txt
+refs:
+  - references/*.md
 ---
 
 # tmux Terminal Multiplexer

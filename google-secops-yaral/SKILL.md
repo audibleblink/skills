@@ -1,6 +1,8 @@
 ---
 name: google-secops-yaral
 description: Master YARAL query language for low-maintenance threat hunting and detection in Google SecOps. Build behavioral detections without magic strings or IOC lists. Use when writing YARAL queries, creating custom detections based on network/process behavior, debugging failing queries, or learning YARAL syntax and best practices.
+refs:
+  - references/*.md
 ---
 
 # Google SecOps YARAL Mastery
@@ -17,38 +19,6 @@ network_connection | network_connection.dst_ipv4 in ["1.2.3.4", "5.6.7.8"]
 
 // ✅ Behavioral (survives infrastructure changes)
 process | within 2m: network_connection as nc | count(distinct nc.dst_ipv4) >= 5
-```
-
-## Quick Start: Three Core Patterns
-
-See **references/detection-patterns.md** for full examples and variations.
-
-### Pattern 1: Network from Specific Application
-
-```yaral
-process
-| process.name in ["chrome.exe", "firefox.exe"]
-| process.user.user_name != "SYSTEM"
-| within 10s: network_connection
-```
-
-### Pattern 2: Multi-Destination Beaconing
-
-```yaral
-process
-| process.ppid != 0
-| within 2m: network_connection as nc
-| count(distinct nc.dst_ipv4) >= 5
-```
-
-### Pattern 3: Multi-Parent Child with Network
-
-```yaral
-process as child_process
-| child_process.ppid != 0
-| within 10s: network_connection
-| any_of(process as parent) where parent.pid == child_process.ppid
-| count(distinct parent.ppid) >= 2
 ```
 
 ## Query Structure
@@ -70,12 +40,24 @@ object_type
 
 See **references/api_reference.md** for complete syntax, fields, and functions.
 
-## Best Practices for Low-Maintenance Detections
+## Detection Patterns
 
-1. **Use behavioral signals** - Count uniqueness: `count(distinct nc.dst_ipv4) >= 5`
-2. **Leverage temporal proximity** - Correlate with `within Xs:`
-3. **Use system context** - Filter by path, user context, parent-child relationships
-4. **Exclude the obvious** - Filter out SYSTEM processes, browsers, update mechanisms
+Three core behavioral patterns for low-maintenance detections:
+
+| Pattern | Use Case | Key Signal |
+|---------|----------|------------|
+| Network from App | Track app connectivity | Path + user context |
+| Multi-Destination Beaconing | C2 identification | `count(distinct dst_ipv4)` |
+| Multi-Parent Child | Lateral movement | Parent-child + network |
+
+See **references/detection-patterns.md** for full examples, variations, and best practices.
+
+## Best Practices
+
+1. **Behavioral signals** - Count uniqueness: `count(distinct nc.dst_ipv4) >= 5`
+2. **Temporal proximity** - Correlate with `within Xs:`
+3. **System context** - Filter by path, user, parent-child relationships
+4. **Exclude the obvious** - Filter SYSTEM processes, browsers, update mechanisms
 5. **Stack weak signals** - Combine multiple conditions for precision
 
 ## Resources
@@ -83,17 +65,17 @@ See **references/api_reference.md** for complete syntax, fields, and functions.
 ### Reference Documentation
 
 - **references/api_reference.md** - Complete YARAL syntax, data types, operators, functions, and object schemas
-- **references/detection-patterns.md** - Detailed examples of the three core patterns with variations and best practices
+- **references/detection-patterns.md** - Detailed examples of the three core patterns with variations
 
 ### Python Query Builder
 
-Run `scripts/example.py` to generate queries:
+Generate queries programmatically:
 
 ```bash
-python scripts/example.py
+python scripts/query_builder.py
 ```
 
-Methods available:
+Methods:
 - `network_from_application()` - App network detection
 - `multi_destination_beaconing()` - C2 identification
 - `multi_parent_child_network()` - Lateral movement detection
@@ -102,13 +84,8 @@ Methods available:
 
 ## Debugging
 
-**No results?**
-- Check field spelling and value types
-- Widen time windows
-- Simplify by removing filters one at a time
-
-**Too noisy?**
-- Narrow `within` window
-- Add exclusions for known-good processes
-- Stack more signals with `and`
-- Use `count(distinct ...)` for outliers
+| Problem | Solution |
+|---------|----------|
+| No results | Check field spelling, widen time windows, remove filters one at a time |
+| Too noisy | Narrow `within` window, add exclusions, stack more signals with `and` |
+| Slow query | Reduce time range, add indexed field filters first |

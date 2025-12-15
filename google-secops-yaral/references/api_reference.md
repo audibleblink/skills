@@ -193,3 +193,39 @@ Matches if all events meet condition:
 process
 | all_of(childprocess) where childprocess.name == "powershell.exe"
 ```
+
+## Authentication Object
+
+### Fields
+
+```yaral
+authentication.type              // Auth type (e.g., "INTERACTIVE", "NETWORK")
+authentication.status            // Success/failure status
+authentication.user.user_name    // Username attempting authentication
+authentication.user.domain       // User's domain
+authentication.target_host       // Target machine for auth
+authentication.source_host       // Source machine initiating auth
+authentication.logon_id          // Unique session identifier
+authentication.timestamp         // When authentication occurred
+```
+
+### Example: Failed Auth Spray Detection
+
+```yaral
+authentication
+| authentication.status == "FAILURE"
+| within 5m: authentication as a
+| count(distinct a.user.user_name) >= 10
+  // 10+ different users failing auth = password spray
+```
+
+### Example: Lateral Auth Chain
+
+```yaral
+authentication
+| authentication.type == "NETWORK"
+| authentication.status == "SUCCESS"
+| within 10m: authentication as a2
+  where a2.source_host == authentication.target_host
+  // Successful auth followed by auth FROM that target = lateral movement
+```

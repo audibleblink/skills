@@ -148,45 +148,6 @@ DeviceFileEvents
 | where Timestamp > ago(1h)
 ```
 
-## macOS-Specific Guidance
-
-### CRITICAL: macOS Plist Queries
-
-**NEVER use `DeviceFileEvents` for plist queries on macOS** - this table does NOT contain plist modification events.
-
-**ALWAYS use:**
-```kql
-DeviceEvents
-| where ActionType == "PlistPropertyModified"
-```
-
-This is the ONLY reliable way to detect LaunchAgent/LaunchDaemon persistence and plist changes on macOS.
-
-### macOS Platform Filtering
-
-**IMPORTANT:** `OSPlatform` only exists in `DeviceInfo`, NOT in other Device* tables.
-
-To filter any Device* table to macOS devices, you MUST join with DeviceInfo:
-
-```kql
-// Correct approach - use a let statement with DeviceInfo
-let macOSDevices = 
-    DeviceInfo
-    | where OSPlatform == "macOS"
-    | distinct DeviceId;
-DeviceEvents  // or DeviceProcessEvents, DeviceFileEvents, etc.
-| where DeviceId in (macOSDevices)
-| where Timestamp > ago(24h)
-// ... rest of query
-```
-
-**NEVER do this** (OSPlatform doesn't exist in these tables):
-```kql
-// WRONG - will fail or return no results
-DeviceEvents
-| where OSPlatform == "macOS"
-```
-
 
 ## General Tips
 

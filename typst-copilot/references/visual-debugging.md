@@ -6,8 +6,6 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 ### 1. Awkward Page Breaks
 
-**Problem:** Content breaks at inappropriate points, disrupting reading flow.
-
 **Signs:**
 - Section headings at bottom of page with no following content
 - Single lines isolated from their paragraph (widows/orphans)
@@ -18,16 +16,13 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 **Prevent heading orphans:**
 ```typ
-#show heading: it => {
-  block(breakable: false, it)
-}
+#show heading: it => block(breakable: false, it)
 ```
 
 **Keep content together:**
 ```typ
 #block(breakable: false)[
   = Section Title
-  
   Introductory paragraph that must stay with heading.
 ]
 ```
@@ -50,39 +45,27 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 #figure(
   image("chart.png"),
   caption: [Chart],
-  placement: auto,  // Lets Typst decide best placement
+  placement: auto,
 )
 ```
 
 ### 2. Widows and Orphans
 
-**Widow:** Last line of paragraph at top of new page
+**Widow:** Last line of paragraph at top of new page  
 **Orphan:** First line of paragraph at bottom of page
 
-**Visual identification:**
-- Single line isolated at page break
-- Paragraph starts/ends with minimal text
-
 **Solutions:**
-
 ```typ
-// Enable optimization
 #set par(linebreaks: optimized)
 
-// Prevent breaks in critical content
 #block(breakable: false)[
   Critical paragraph that must stay together
 ]
 
-// Adjust spacing to encourage better breaks
 #set par(leading: 0.65em)
 ```
 
 ### 3. Section Breaks
-
-**Problem:** Sections don't start on appropriate pages.
-
-**Solutions:**
 
 **Always start chapters on new page:**
 ```typ
@@ -95,11 +78,8 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 **Start chapters on odd (right) pages:**
 ```typ
 #show heading.where(level: 1): it => {
-  // Break to odd page
   let page-num = context counter(page).get().first()
-  if calc.even(page-num) {
-    pagebreak()
-  }
+  if calc.even(page-num) { pagebreak() }
   pagebreak()
   it
 }
@@ -115,10 +95,6 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 ### 4. List Fragmentation
 
-**Problem:** Lists break across pages awkwardly, separating items from their context.
-
-**Solutions:**
-
 **Keep short lists together:**
 ```typ
 #block(breakable: false)[
@@ -128,16 +104,12 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 ]
 ```
 
-**Control list spacing to encourage better breaks:**
+**Control list spacing:**
 ```typ
 #set list(spacing: 1em)
 ```
 
 ### 5. Figure & Table Placement
-
-**Problem:** Figures/tables appear far from their references or break awkwardly.
-
-**Solutions:**
 
 **Use float placement:**
 ```typ
@@ -155,32 +127,23 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 **Allow table breaking for long tables:**
 ```typ
+// Headers repeat automatically with table.header()
 #table(
+  table.header([Col 1], [Col 2]),
   // Long table content
 )
-// Headers repeat automatically with table.header()
 ```
 
 **Landscape orientation for wide tables:**
 ```typ
 #rotate(90deg, reflow: true)[
-  #table(
-    columns: 10,
-    // Many columns
-  )
+  #table(columns: 10, ...)
 ]
 ```
 
 ## Layout Issues
 
 ### 1. Margin Problems
-
-**Signs:**
-- Content too close to edges
-- Inconsistent margins
-- Header/footer overlaps with body
-
-**Solutions:**
 
 **Standard academic margins:**
 ```typ
@@ -192,7 +155,7 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 ))
 ```
 
-**Binding offset (for printed docs):**
+**Binding offset:**
 ```typ
 #set page(margin: (
   left: 3.5cm,    // Extra space for binding
@@ -216,21 +179,10 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 ### 2. Spacing Inconsistencies
 
-**Signs:**
-- Uneven spacing between elements
-- Headings too close to previous content
-- Lists cramped or too spread out
-
-**Solutions:**
-
 **Consistent heading spacing:**
 ```typ
-#show heading: set block(
-  above: 2em,
-  below: 1em,
-)
+#show heading: set block(above: 2em, below: 1em)
 
-// Different spacing by level
 #show heading.where(level: 1): set block(above: 3em, below: 1.5em)
 #show heading.where(level: 2): set block(above: 2em, below: 1em)
 ```
@@ -253,13 +205,6 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 ### 3. Alignment Problems
 
-**Signs:**
-- Text not aligned to grid
-- Mixed alignments within sections
-- Figures not centered properly
-
-**Solutions:**
-
 **Justify paragraphs:**
 ```typ
 #set par(justify: true)
@@ -278,7 +223,7 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 #show heading.where(level: 1): set align(center)
 ```
 
-**Grid alignment for complex layouts:**
+**Grid alignment:**
 ```typ
 #grid(
   columns: (1fr, 1fr),
@@ -291,18 +236,10 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 ### 4. Column Layout Issues
 
-**Signs:**
-- Unbalanced columns
-- Column breaks at wrong places
-- Content overflows column
-
-**Solutions:**
-
 **Set column count:**
 ```typ
 #set page(columns: 2)
 
-// Or for specific sections
 #columns(2)[
   Content in two columns
 ]
@@ -310,17 +247,13 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 **Column gaps:**
 ```typ
-#set page(
-  columns: 2,
-  column-gutter: 1em,
-)
+#set page(columns: 2, column-gutter: 1em)
 ```
 
 **Span across columns:**
 ```typ
 #set page(columns: 2)
 
-// Full-width heading
 #place(
   top + center,
   scope: "parent",
@@ -328,18 +261,9 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 )[
   = Full-Width Heading
 ]
-
-// Regular two-column content follows
 ```
 
 ### 5. Element Overlap
-
-**Signs:**
-- Header/footer overlaps body
-- Floating elements cover text
-- Margin notes collide
-
-**Solutions:**
 
 **Adjust header/footer placement:**
 ```typ
@@ -354,20 +278,13 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 #place(
   top + right,
   float: true,
-  clearance: 1em,  // Space around floating element
+  clearance: 1em,
 )[
   Floating content
 ]
 ```
 
 ### 6. White Space Distribution
-
-**Signs:**
-- Large gaps between elements
-- Cramped sections
-- Inconsistent vertical rhythm
-
-**Solutions:**
 
 **Establish vertical rhythm:**
 ```typ
@@ -381,7 +298,7 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 **Fill remaining space:**
 ```typ
-#block(height: 1fr)  // Pushes following content to bottom
+#block(height: 1fr)  // Pushes content to bottom
 ```
 
 **Distribute space in grid:**
@@ -396,169 +313,59 @@ Guide for identifying and fixing page flow and layout issues in Typst PDFs.
 
 ## Diagnostic Techniques
 
-### 1. Visual Grid Overlay
-
-Show the underlying grid structure:
+### Visual Grid Overlay
 
 ```typ
-// Temporary debugging
 #place(
   line(length: 100%, stroke: (dash: "dashed", paint: red)),
   dy: 0cm,
 )
 ```
 
-### 2. Highlight Page Breaks
-
-Mark where pages break during development:
+### Show Element Boundaries
 
 ```typ
-#show page: it => {
-  place(
-    bottom + center,
-    text(fill: red, size: 8pt)[Page break here]
-  )
-  it
-}
+#show block: it => box(stroke: blue + 0.5pt, inset: 0pt, it)
 ```
 
-### 3. Show Element Boundaries
-
-```typ
-// Debug mode: show all boxes
-#show block: it => box(
-  stroke: blue + 0.5pt,
-  inset: 0pt,
-  it,
-)
-```
-
-### 4. Check Measurements
+### Check Measurements
 
 ```typ
 #context {
   let page-h = page.height
   let margin-t = page.margin.top
-  let margin-b = page.margin.bottom
-  let available = page-h - margin-t - margin-b
-  
+  let available = page-h - margin-t - page.margin.bottom
   [Available height: #available]
 }
 ```
 
 ## Common Layout Patterns
 
-### 1. Title Page
+### Title Page
 
 ```typ
 #align(center + horizon)[
-  #text(size: 24pt, weight: "bold")[
-    Document Title
-  ]
-  
+  #text(size: 24pt, weight: "bold")[Document Title]
   #v(2em)
-  
-  #text(size: 14pt)[
-    Author Name
-  ]
-  
+  #text(size: 14pt)[Author Name]
   #v(1em)
-  
-  #text(size: 12pt)[
-    #datetime.today().display()
-  ]
+  #text(size: 12pt)[#datetime.today().display()]
 ]
 
 #pagebreak()
 ```
 
-### 2. Two-Column with Title Spanning
-
-```typ
-#set page(columns: 2)
-
-// Title spans both columns
-#place(
-  top + center,
-  scope: "parent",
-  float: true,
-)[
-  = Document Title
-  
-  Author information
-]
-
-// Content flows in columns
-#lorem(100)
-```
-
-### 3. Academic Paper Layout
-
-```typ
-#set page(
-  paper: "a4",
-  margin: (x: 2.5cm, y: 2.5cm),
-  numbering: "1",
-)
-
-#set par(
-  justify: true,
-  leading: 0.65em,
-  first-line-indent: 1.8em,
-)
-
-#set heading(numbering: "1.1")
-
-// Title
-#align(center)[
-  #text(size: 17pt, weight: "bold")[Title]
-  
-  #v(0.5em)
-  
-  #text(size: 12pt)[Authors]
-]
-
-#v(2em)
-
-// Abstract
-#align(center)[
-  #block(
-    width: 80%,
-    par(justify: false, first-line-indent: 0em)[
-      *Abstract*
-      
-      #lorem(50)
-    ]
-  )
-]
-
-#v(2em)
-
-// Content
-= Introduction
-#lorem(100)
-```
-
-### 4. Chapter Openings
+### Chapter Openings
 
 ```typ
 #show heading.where(level: 1): it => {
   pagebreak()
-  
   v(4em)
-  
   block[
-    #text(size: 10pt, weight: "regular")[
-      CHAPTER #counter(heading).display()
-    ]
-    
+    #text(size: 10pt)[CHAPTER #counter(heading).display()]
     #v(0.5em)
-    
-    #text(size: 20pt, weight: "bold")[
-      #it.body
-    ]
+    #text(size: 20pt, weight: "bold")[#it.body]
   ]
-  
   v(2em)
 }
 ```
@@ -579,63 +386,3 @@ When reviewing compiled PDF:
 - [ ] Page numbers in correct position
 - [ ] No overlapping elements
 - [ ] White space distributed evenly
-
-## Advanced Techniques
-
-### Conditional Layout
-
-```typ
-#let conditional-break(level) = {
-  context {
-    let loc = here()
-    let remaining = page.height - loc.position().y
-    
-    if remaining < 5cm {
-      pagebreak(weak: true)
-    }
-  }
-}
-
-#show heading: it => {
-  conditional-break(it.level)
-  it
-}
-```
-
-### Custom Grid Systems
-
-```typ
-#let baseline-grid(content) = {
-  set par(leading: 0.5em)
-  set block(spacing: 1em)
-  content
-}
-
-#baseline-grid[
-  Content aligned to baseline grid
-]
-```
-
-### Responsive Margins
-
-```typ
-#let adaptive-margins(content) = context {
-  let page-h = page.height
-  let margin = if page-h > 25cm {
-    3cm
-  } else {
-    2cm
-  }
-  
-  set page(margin: margin)
-  content
-}
-```
-
-## Resources
-
-- Page layout principles
-- Typography vertical rhythm
-- Grid systems
-- Print vs digital considerations
-- Accessibility in layout

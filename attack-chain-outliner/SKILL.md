@@ -1,6 +1,6 @@
 ---
 name: attack-chain-outliner
-description: Expert attack chain documentation for cybersecurity analysis. Create structured threat reports following standardized formats, map techniques to MITRE ATT&CK, generate detection logic and pseudocode queries, and produce professional security documentation. Use when creating attack chain documentation, documenting adversary techniques (persistence, lateral movement, credential access, etc.), writing detection rules, mapping to MITRE ATT&CK framework, analyzing malware or APT TTPs, creating threat intelligence reports, or building detection engineering content. Supports both Typst and Markdown output formats.
+description: Create structured attack chain documentation with MITRE ATT&CK mapping, detection logic, and professional threat reports. Use when documenting adversary techniques, writing detection rules, analyzing malware/APT TTPs, or creating threat intelligence reports.
 ---
 
 # Threat Modeling & Attack Chain Documentation

@@ -1,6 +1,6 @@
 ---
 name: kql-mde-xdr
-description: Expert in Kusto Query Language (KQL) and Microsoft Defender for Endpoint (MDE) / Microsoft 365 Defender XDR. Use when working with KQL queries, threat hunting, security investigations, writing detection rules, analyzing security data in Microsoft Sentinel, MDE, or any Microsoft XDR platform. Triggers on KQL syntax questions, threat hunting queries, detection engineering, incident investigation, or security analytics using Microsoft security tools.
+description: Write and optimize KQL queries for Microsoft Defender (MDE), Sentinel, and Microsoft 365 Defender XDR. Use when threat hunting, writing detection rules, investigating incidents, or analyzing security data with KQL.
 refs:
   - references/*.md
 ---

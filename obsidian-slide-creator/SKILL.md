@@ -1,6 +1,6 @@
 ---
 name: obsidian-slide-creator
-description: Create presentation slide decks for Obsidian Slides Extended (reveal.js wrapper). Use when the user requests slide generation, presentation creation, or converting content to slides. Handles multiple input formats including outlines, topic descriptions, existing markdown, and interactive planning. Always uses the 'blood' theme.
+description: Create presentation slide decks for Obsidian Slides Extended (reveal.js). Use when generating slides, creating presentations, or converting content to slide format.
 ---
 
 # Obsidian Slide Creator

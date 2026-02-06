@@ -1,6 +1,6 @@
 ---
 name: google-secops-yaral
-description: Master YARAL query language for low-maintenance threat hunting and detection in Google SecOps. Build behavioral detections without magic strings or IOC lists. Use when writing YARAL queries, creating custom detections based on network/process behavior, debugging failing queries, or learning YARAL syntax and best practices.
+description: Write and debug YARAL queries for behavioral threat hunting and detection in Google SecOps. Use when creating YARAL detections, hunting for network/process behavior, or learning YARAL syntax.
 refs:
   - references/*.md
 ---

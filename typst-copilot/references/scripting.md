@@ -1,223 +1,116 @@
 # Typst Scripting Reference
 
-Typst includes a built-in scripting language for logic and data manipulation.
-
 ## Variables
 
-Variables store values for reuse. All bindings are immutable by default but can be reassigned with `=`.
-
-### Let Bindings
-
-```typst
+```typ
 #let name = "Alice"
 #let count = 42
-#let ratio = 3.14
-#let active = true
 #let items = (1, 2, 3)
 #let person = (name: "Bob", age: 30)
-```
 
-### Destructuring
-
-```typst
+// Destructuring
 #let (a, b) = (1, 2)
-#let (name: n, age: a) = (name: "Alice", age: 25)
 ```
-
-## Data Types
-
-| Type | Example |
-|------|---------|
-| Integer | `42`, `-10` |
-| Float | `3.14`, `1e-5` |
-| String | `"hello"` |
-| Boolean | `true`, `false` |
-| Array | `(1, 2, 3)` |
-| Dictionary | `(key: "value")` |
-| Content | `[*bold*]` |
-| None | `none` |
-| Auto | `auto` |
 
 ## Arrays
 
-```typst
+```typ
 #let arr = (1, 2, 3, 4, 5)
 
-arr.len()           // 5
-arr.first()         // 1
-arr.last()          // 5
-arr.at(2)           // 3
-arr.slice(1, 3)     // (2, 3)
-arr.contains(3)     // true
-arr.map(x => x * 2) // (2, 4, 6, 8, 10)
-arr.filter(x => x > 2)  // (3, 4, 5)
+arr.len()              // 5
+arr.at(2)              // 3
+arr.first(), arr.last()
+arr.slice(1, 3)        // (2, 3)
+arr.contains(3)        // true
+arr.map(x => x * 2)    // (2, 4, 6, 8, 10)
+arr.filter(x => x > 2) // (3, 4, 5)
 arr.fold(0, (a, b) => a + b)  // 15
-arr.join(", ")      // "1, 2, 3, 4, 5"
-arr.push(6)         // Mutates array
-arr.pop()           // Returns and removes last
+arr.join(", ")         // "1, 2, 3, 4, 5"
 ```
 
 ## Dictionaries
 
-```typst
+```typ
 #let dict = (name: "Alice", age: 25)
 
-dict.name           // "Alice"
-dict.at("age")      // 25
-dict.keys()         // ("name", "age")
-dict.values()       // ("Alice", 25)
-dict.pairs()        // (("name", "Alice"), ("age", 25))
-dict.insert("city", "NYC")
+dict.name              // "Alice"
+dict.at("age")         // 25
+dict.keys()            // ("name", "age")
+dict.values()          // ("Alice", 25)
 ```
 
 ## Functions
 
-### Function Definition
-
-```typst
+```typ
 #let greet(name) = [Hello, #name!]
 #let add(a, b) = a + b
-```
 
-### Default Parameters
-
-```typst
+// Default parameters
 #let greet(name, greeting: "Hello") = [#greeting, #name!]
-#greet("Alice")                    // Hello, Alice!
-#greet("Bob", greeting: "Hi")      // Hi, Bob!
-```
 
-### Named Parameters
-
-```typst
-#let rect-area(width: 10, height: 5) = width * height
-#rect-area()                // 50
-#rect-area(width: 20)       // 100
-```
-
-### Content Functions
-
-```typst
+// Content function
 #let highlight(body) = {
   set text(fill: red)
   body
 }
-
-#highlight[Important text]
+#highlight[Important]
 ```
 
-### Template Functions
+## Template Functions
 
-```typst
-#let article(title: none, authors: (), body) = {
-  set document(title: title, author: authors)
-  set page(paper: "a4", margin: 2cm, numbering: "1")
-  set text(font: "Linux Libertine", size: 11pt)
-  set par(justify: true)
+```typ
+#let article(title: none, body) = {
+  set document(title: title)
+  set page(paper: "a4", numbering: "1")
+  set text(size: 11pt)
   set heading(numbering: "1.1")
   
-  align(center)[#text(size: 17pt, weight: "bold", title)]
+  align(center, text(17pt, weight: "bold", title))
   body
 }
 
 // Usage
-#show: article.with(title: [My Paper], authors: ("Alice",))
+#show: article.with(title: [My Paper])
 ```
 
 ## Control Flow
 
-### Conditionals
+```typ
+#if x > 0 { [Positive] } else { [Non-positive] }
 
-```typst
-#let x = 5
-
-#if x > 0 {
-  [Positive]
-} else if x < 0 {
-  [Negative]
-} else {
-  [Zero]
-}
-```
-
-### For Loops
-
-```typst
-#for i in range(5) {
-  [Item #i ]
-}
-
-#for (key, value) in (a: 1, b: 2) {
-  [#key: #value ]
-}
-
-#for item in ("apple", "banana", "cherry") {
-  list.item(item)
-}
-```
-
-### While Loops
-
-```typst
-#let i = 0
-#while i < 3 {
-  [#i ]
-  i = i + 1
-}
+#for i in range(5) { [#i ] }
+#for item in items { [#item ] }
+#for (key, val) in dict { [#key: #val ] }
 ```
 
 ## Operators
 
-| Operator | Description |
-|----------|-------------|
-| `+`, `-`, `*`, `/` | Arithmetic |
-| `==`, `!=` | Equality |
-| `<`, `>`, `<=`, `>=` | Comparison |
-| `and`, `or`, `not` | Logical |
-| `in`, `not in` | Membership |
-| `+=` | Addition assignment |
+`+`, `-`, `*`, `/`, `==`, `!=`, `<`, `>`, `<=`, `>=`, `and`, `or`, `not`, `in`, `not in`
 
-## String Operations
+## Strings
 
-```typst
-#let s = "Hello, World!"
-
-s.len()             // 13
-s.contains("World") // true
-s.starts-with("He") // true
-s.ends-with("!")    // true
-s.replace("World", "Typst")  // "Hello, Typst!"
-s.split(", ")       // ("Hello", "World!")
-s.trim()            // removes whitespace
-upper(s)            // "HELLO, WORLD!"
-lower(s)            // "hello, world!"
+```typ
+s.len(), s.contains("x"), s.starts-with("a"), s.ends-with("z")
+s.replace("old", "new"), s.split(","), s.trim()
+upper(s), lower(s)
 ```
 
-## Import and Modules
+## Imports
 
-```typst
-// Import from file
-#import "template.typ": conf, title
-
-// Import all
-#import "utils.typ": *
-
-// Import with alias
-#import "math.typ": formula as f
-
-// Include (render content)
-#include "chapter1.typ"
+```typ
+#import "file.typ": func1, func2
+#import "file.typ": *
+#import "file.typ": func as alias
+#include "chapter.typ"  // render content
 ```
 
 ## Context
 
-Access document state that depends on location:
+Access location-dependent state:
 
-```typst
-#context {
-  let current-page = counter(page).get()
-  [Page: #current-page.first()]
-}
+```typ
+#context counter(page).display()
+#context counter(page).get().first()
 
 // Access set rule values
 #set text(lang: "en")
@@ -226,29 +119,13 @@ Access document state that depends on location:
 
 ## Counters & State
 
-### Counter
-
-```typst
-#let my-counter = counter("mycounter")
-
-#context my-counter.display()
-#context my-counter.display("1.1")
-#context my-counter.get()
-
+```typ
+#let my-counter = counter("name")
 #my-counter.step()
-#my-counter.step(5)
 #my-counter.update(10)
-#my-counter.update(n => n * 2)
-```
+#context my-counter.display()
 
-### State
-
-```typst
-#let my-state = state("mystate", 0)
-
-#context my-state.display()
-#context my-state.get()
-
+#let my-state = state("name", 0)
 #my-state.update(5)
-#my-state.update(x => x + 1)
+#context my-state.get()
 ```

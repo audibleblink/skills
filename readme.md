@@ -29,6 +29,11 @@ Create presentation slide decks for Obsidian Slides Extended (reveal.js). Use wh
 
 **Location:** `obsidian-slide-creator/SKILL.md`
 
+### ship-learn-next
+Transform learning content (like YouTube transcripts, articles, tutorials) into actionable implementation plans using the Ship-Learn-Next framework. Use when user wants to turn advice, lessons, or educational content into concrete action steps, reps, or a learning quest.
+
+**Location:** `ship-learn-next/SKILL.md`
+
 ### skill-creator
 Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.
 
@@ -48,3 +53,8 @@ Typst document creation, editing, and compilation assistant. Use when (1) creati
 React and Next.js performance optimization guidelines from Vercel Engineering. Use when writing, reviewing, or refactoring React/Next.js components, data fetching, or bundle optimization.
 
 **Location:** `react-best-practices/SKILL.md`
+
+### youtube-transcript
+Download YouTube video transcripts when user provides a YouTube URL or asks to download/get/fetch a transcript from YouTube. Also use when user wants to transcribe or get captions/subtitles from a YouTube video.
+
+**Location:** `youtube-transcript/SKILL.md`

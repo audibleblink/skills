@@ -1,0 +1,19 @@
+[tasks."update-readme"]
+description = "Update README.md with skill descriptions from SKILL.md frontmatter"
+run = '''
+opencode run \
+  --title "Update README skill descriptions" \
+  "Update the README.md with descriptions from all skills in this repo." \
+  "Find every SKILL.md file, extract the name and description from the YAML frontmatter," \
+  "and regenerate the '## Available Skills' section in README.md." \
+  "For each skill, use this exact format:" \
+  "" \
+  '### <name>' \
+  '<description>' \
+  '' \
+  '**Location:** `<directory>/SKILL.md`' \
+  "" \
+  "List skills alphabetically by name." \
+  "Keep the header and intro paragraph above '## Available Skills' unchanged." \
+  "Do NOT modify any SKILL.md files."
+'''

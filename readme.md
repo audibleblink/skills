@@ -14,6 +14,11 @@ Write and debug YARAL queries for behavioral threat hunting and detection in Goo
 
 **Location:** `google-secops-yaral/SKILL.md`
 
+### grepai
+Semantic code search, and call graph analysis with GrepAI. Use when (1) searching code by meaning/intent rather than exact text, (2) finding function callers or callees, or (3) integrating GrepAI with AI agents via JSON/TOON output.
+
+**Location:** `grepai/SKILL.md`
+
 ### kql-mde-xdr
 Write and optimize KQL queries for Microsoft Defender (MDE), Sentinel, and Microsoft 365 Defender XDR. Use when threat hunting, writing detection rules, investigating incidents, or analyzing security data with KQL.
 

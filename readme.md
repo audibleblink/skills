@@ -9,6 +9,11 @@ Create structured attack chain documentation with MITRE ATT&CK mapping, detectio
 
 **Location:** `attack-chain-outliner/SKILL.md`
 
+### detection-engineering
+Expert guidance for writing, reviewing, and improving security detection rules. Apply core detection engineering frameworks including Capability Abstraction, Detection Spectrum, and the Funnel of Fidelity. Use when writing detection rules (Sigma, YARA-L, KQL, Splunk SPL), reviewing existing detections for blind spots, analyzing attack techniques for detection opportunities, evaluating detection coverage and evasion resistance, or building detection strategies that balance precision vs breadth.
+
+**Location:** `detection-engineering/SKILL.md`
+
 ### google-secops-yaral
 Write and debug YARAL queries for behavioral threat hunting and detection in Google SecOps. Use when creating YARAL detections, hunting for network/process behavior, or learning YARAL syntax.
 

@@ -49,11 +49,6 @@ Guide for creating effective skills. This skill should be used when users want t
 
 **Location:** `skill-creator/SKILL.md`
 
-### tmux
-Manage persistent terminal sessions with tmux. Use when running long-lived processes, managing concurrent sessions, monitoring background tasks, or capturing output from background processes.
-
-**Location:** `tmux/SKILL.md`
-
 ### typst-copilot
 Typst document creation, editing, and compilation assistant. Use when (1) creating Typst documents, (2) converting Markdown/LaTeX to Typst, (3) compiling .typ files to PDF, (4) debugging layout/page flow issues, (5) answering Typst syntax questions.
 

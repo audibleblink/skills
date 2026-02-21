@@ -34,10 +34,10 @@ Build MCP (Model Context Protocol) servers that connect LLMs to external APIs an
 
 **Location:** `mcp-builder/SKILL.md`
 
-### obsidian-slide-creator
-Create presentation slide decks for Obsidian Slides Extended (reveal.js). Use when generating slides, creating presentations, or converting content to slide format.
+### obsidian-vault
+Write and edit Obsidian vault notes using Obsidian-flavored Markdown. Use when (1) creating new .md notes for an Obsidian vault, (2) editing existing Obsidian notes, (3) adding properties/frontmatter, wikilinks, callouts, embeds, tags, or other Obsidian-specific syntax, (4) converting standard Markdown to Obsidian format, (5) creating presentation slides for Obsidian Slides Extended (reveal.js), or (6) any task involving Obsidian Markdown formatting.
 
-**Location:** `obsidian-slide-creator/SKILL.md`
+**Location:** `obsidian-vault/SKILL.md`
 
 ### ship-learn-next
 Transform learning content (like YouTube transcripts, articles, tutorials) into actionable implementation plans using the Ship-Learn-Next framework. Use when user wants to turn advice, lessons, or educational content into concrete action steps, reps, or a learning quest.

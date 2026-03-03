@@ -59,6 +59,11 @@ React and Next.js performance optimization guidelines from Vercel Engineering. U
 
 **Location:** `react-best-practices/SKILL.md`
 
+### youtube-search
+Search YouTube for videos by query and return structured JSON results including title, video ID, channel, duration, view count, publish time, approximate upload date, thumbnails, and video URL. Use when the user wants to find YouTube videos, look up content on YouTube, or needs video metadata from YouTube search results.
+
+**Location:** `youtube-search/SKILL.md`
+
 ### youtube-transcript
 Download YouTube video transcripts when user provides a YouTube URL or asks to download/get/fetch a transcript from YouTube. Also use when user wants to transcribe or get captions/subtitles from a YouTube video.
 

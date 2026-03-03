@@ -34,6 +34,11 @@ Build MCP (Model Context Protocol) servers that connect LLMs to external APIs an
 
 **Location:** `mcp-builder/SKILL.md`
 
+### notebooklm
+Complete API for Google NotebookLM - full programmatic access including features not in the web UI. Create notebooks, add sources, generate all artifact types, download in multiple formats. Activates on explicit /notebooklm or intent like "create a podcast about X"
+
+**Location:** `notebooklm/SKILL.md`
+
 ### obsidian-vault
 Write and edit Obsidian vault notes using Obsidian-flavored Markdown. Use when (1) creating new .md notes for an Obsidian vault, (2) editing existing Obsidian notes, (3) adding properties/frontmatter, wikilinks, callouts, embeds, tags, or other Obsidian-specific syntax, (4) converting standard Markdown to Obsidian format, (5) creating presentation slides for Obsidian Slides Extended (reveal.js), or (6) any task involving Obsidian Markdown formatting.
 

@@ -1,0 +1,49 @@
+{
+  "eval_name": "eval-ioc-pivot",
+  "variant": "without_skill",
+  "pass_rate": 0.625,
+  "passed": 5,
+  "total": 8,
+  "expectations": [
+    {
+      "text": "Searches DeviceNetworkEvents for the IP as RemoteIP",
+      "passed": true,
+      "evidence": "DeviceNetworkEvents: True, RemoteIP: True"
+    },
+    {
+      "text": "Pivots through AlertEvidence for related alerts",
+      "passed": true,
+      "evidence": "AlertEvidence in query: True"
+    },
+    {
+      "text": "Joins AlertInfo to surface alert titles/severity",
+      "passed": true,
+      "evidence": "AlertInfo in query: True"
+    },
+    {
+      "text": "Surfaces user accounts involved with the IP",
+      "passed": true,
+      "evidence": "AccountName in query: True"
+    },
+    {
+      "text": "Uses FileOriginIP in DeviceFileEvents to catch downloads from IP (skill-specific)",
+      "passed": false,
+      "evidence": "FileOriginIP present: False"
+    },
+    {
+      "text": "Uses materialize() for performance on reused sub-queries",
+      "passed": false,
+      "evidence": "materialize() present: False"
+    },
+    {
+      "text": "Includes a time filter",
+      "passed": false,
+      "evidence": "ago() time filter present: False"
+    },
+    {
+      "text": "Correlates results into a unified output (uses union or single result)",
+      "passed": true,
+      "evidence": "union/join present: True"
+    }
+  ]
+}

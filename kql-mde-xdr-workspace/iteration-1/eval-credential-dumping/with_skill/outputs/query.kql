@@ -1,0 +1,110 @@
+// T1003 - OS Credential Dumping
+// Covers: T1003.001 (LSASS Memory), T1003.002 (SAM), T1003.003 (NTDS.dit)
+// Hunting window: 7 days
+
+// ── T1003.001 · LSASS Memory Access ─────────────────────────────────────────
+let lsass_access =
+    DeviceEvents
+    | where Timestamp > ago(7d)
+    | where ActionType == "OpenProcessApiCall"
+    | where FileName =~ "lsass.exe"
+    // Exclude known-good system callers
+    | where InitiatingProcessFileName !in~ (
+        "svchost.exe", "lsass.exe", "MsMpEng.exe",
+        "csrss.exe", "wininit.exe", "services.exe"
+    )
+    | project
+        Timestamp,
+        DetectionType   = "T1003.001 - LSASS Memory Access",
+        DeviceName,
+        AccountName     = InitiatingProcessAccountName,
+        CommandLine     = InitiatingProcessCommandLine,
+        ProcessName     = InitiatingProcessFileName;
+
+// ── T1003.001 · Known credential-dumping tools (process names / cmdline) ─────
+let credump_tools =
+    DeviceProcessEvents
+    | where Timestamp > ago(7d)
+    | where
+        // Named tools
+        FileName has_any ("mimikatz", "procdump", "pypykatz", "lsadump", "wce.exe", "pwdump")
+        or ProcessCommandLine has_any ("mimikatz", "sekurlsa", "lsadump", "wce ", "pwdump")
+        // ProcDump targeting lsass
+        or (FileName =~ "procdump.exe" and ProcessCommandLine has "lsass")
+        or (FileName =~ "procdump64.exe" and ProcessCommandLine has "lsass")
+        // Task Manager / rundll32 / comsvcs MiniDump pattern
+        or (ProcessCommandLine has "comsvcs" and ProcessCommandLine has "MiniDump")
+        // Comsvc via rundll32
+        or (FileName =~ "rundll32.exe" and ProcessCommandLine has "MiniDump")
+    | project
+        Timestamp,
+        DetectionType   = "T1003.001 - Credential Dumping Tool",
+        DeviceName,
+        AccountName,
+        CommandLine     = ProcessCommandLine,
+        ProcessName     = FileName;
+
+// ── T1003.002 · SAM Database Access ──────────────────────────────────────────
+let sam_dump =
+    DeviceProcessEvents
+    | where Timestamp > ago(7d)
+    | where
+        // reg save / copy of SAM hive
+        (ProcessCommandLine has "reg" and ProcessCommandLine has "save"
+            and ProcessCommandLine has_any ("sam", "system", "security"))
+        or (ProcessCommandLine has "copy" and ProcessCommandLine has_any (@"\SAM", @"\SYSTEM", @"\SECURITY"))
+        // Volume Shadow Copy + SAM path
+        or (ProcessCommandLine has "vssadmin" and ProcessCommandLine has_any ("sam", "ntds"))
+        // Impacket / secretsdump-style references
+        or ProcessCommandLine has_any ("secretsdump", "hashdump", "samdump")
+    | project
+        Timestamp,
+        DetectionType   = "T1003.002 - SAM Database Dump",
+        DeviceName,
+        AccountName,
+        CommandLine     = ProcessCommandLine,
+        ProcessName     = FileName;
+
+// ── T1003.003 · NTDS.dit File Access ─────────────────────────────────────────
+let ntds_file =
+    DeviceFileEvents
+    | where Timestamp > ago(7d)
+    | where FileName =~ "ntds.dit"
+        or FolderPath has @"\Windows\NTDS"
+        or FolderPath has @"\NTDS"
+    | where ActionType in ("FileCreated", "FileModified", "FileRenamed", "FileCopied")
+    | project
+        Timestamp,
+        DetectionType   = "T1003.003 - NTDS.dit Access",
+        DeviceName,
+        AccountName     = InitiatingProcessAccountName,
+        CommandLine     = InitiatingProcessCommandLine,
+        ProcessName     = InitiatingProcessFileName;
+
+// ── T1003.003 · NTDS via ntdsutil / vssadmin / diskshadow ────────────────────
+let ntds_cmd =
+    DeviceProcessEvents
+    | where Timestamp > ago(7d)
+    | where
+        (FileName =~ "ntdsutil.exe")
+        or (FileName =~ "diskshadow.exe" and ProcessCommandLine has_any ("ntds", "exec", "script"))
+        or (FileName =~ "vssadmin.exe" and ProcessCommandLine has "create shadow")
+        or (ProcessCommandLine has "ntds.dit")
+    | project
+        Timestamp,
+        DetectionType   = "T1003.003 - NTDS Extraction Command",
+        DeviceName,
+        AccountName,
+        CommandLine     = ProcessCommandLine,
+        ProcessName     = FileName;
+
+// ── Union all findings ────────────────────────────────────────────────────────
+union lsass_access, credump_tools, sam_dump, ntds_file, ntds_cmd
+| project
+    Timestamp,
+    DetectionType,
+    DeviceName,
+    AccountName,
+    ProcessName,
+    CommandLine
+| sort by Timestamp desc

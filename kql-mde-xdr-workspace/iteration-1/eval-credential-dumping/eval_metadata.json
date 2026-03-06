@@ -1,0 +1,6 @@
+{
+  "eval_id": 1,
+  "eval_name": "credential-dumping",
+  "prompt": "I need a KQL hunting query for MITRE ATT&CK T1003 - OS Credential Dumping. Cover the main Windows techniques: LSASS memory access, SAM database dumps, and NTDS.dit access. Show me device name, account, and command line for each hit.",
+  "assertions": []
+}

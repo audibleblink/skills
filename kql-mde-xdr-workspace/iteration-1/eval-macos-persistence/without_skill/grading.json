@@ -1,0 +1,39 @@
+{
+  "eval_name": "eval-macos-persistence",
+  "variant": "without_skill",
+  "pass_rate": 0.16666666666666666,
+  "passed": 1,
+  "total": 6,
+  "expectations": [
+    {
+      "text": "Uses DeviceEvents (not DeviceFileEvents) as primary table for plist events",
+      "passed": false,
+      "evidence": "DeviceEvents in query: False, PlistPropertyModified in query: False"
+    },
+    {
+      "text": "Filters on ActionType == PlistPropertyModified",
+      "passed": false,
+      "evidence": "Found 'PlistPropertyModified': False"
+    },
+    {
+      "text": "Filters to macOS via DeviceInfo lookup (not direct OSPlatform on event table)",
+      "passed": false,
+      "evidence": "Uses DeviceInfo+OSPlatform: False, Bad direct filter: False"
+    },
+    {
+      "text": "Projects plist path from AdditionalFields",
+      "passed": false,
+      "evidence": "AdditionalFields/PlistDetails present: False"
+    },
+    {
+      "text": "Projects modified property name and value",
+      "passed": false,
+      "evidence": "PropertyName: False, PropertyValue: False"
+    },
+    {
+      "text": "Projects initiating process details (who made the change)",
+      "passed": true,
+      "evidence": "InitiatingProcessFileName present: True"
+    }
+  ]
+}

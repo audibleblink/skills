@@ -1,0 +1,89 @@
+// T1003 - OS Credential Dumping
+// Covers: LSASS memory access, SAM database dumps, NTDS.dit access
+// Tables: DeviceProcessEvents, DeviceFileEvents
+
+let LsassMemoryAccess =
+    DeviceProcessEvents
+    | where Timestamp > ago(7d)
+    | where (
+        // Common credential dumping tools targeting LSASS
+        FileName in~ ("mimikatz.exe", "procdump.exe", "procdump64.exe", "rundll32.exe", "comsvcs.dll")
+        or InitiatingProcessFileName in~ ("mimikatz.exe")
+        // Procdump / task manager style LSASS dump via command line
+        or (FileName in~ ("procdump.exe", "procdump64.exe") and ProcessCommandLine has "lsass")
+        // comsvcs MiniDump via rundll32
+        or (FileName =~ "rundll32.exe" and ProcessCommandLine has_all ("comsvcs", "MiniDump"))
+        // Direct lsass dump patterns
+        or (ProcessCommandLine has_all ("lsass", "dump"))
+        or (ProcessCommandLine has_all ("lsass", "minidump"))
+    )
+    | project
+        Timestamp,
+        Technique = "LSASS Memory Access",
+        DeviceName,
+        AccountName,
+        CommandLine = ProcessCommandLine,
+        InitiatingProcess = InitiatingProcessFileName,
+        FileName;
+
+let SamDump =
+    DeviceProcessEvents
+    | where Timestamp > ago(7d)
+    | where (
+        // reg save of SAM/SYSTEM/SECURITY hives
+        (FileName =~ "reg.exe" and ProcessCommandLine has "save" and ProcessCommandLine has_any ("sam", "system", "security"))
+        // secretsdump style or impacket
+        or ProcessCommandLine has_any ("secretsdump", "samdump2", "fgdump", "pwdumpx", "gsecdump")
+        // volume shadow copy based SAM extraction
+        or (ProcessCommandLine has_any ("\\windows\\system32\\config\\sam", "\\windows\\system32\\config\\system"))
+        // esentutl copying SAM
+        or (FileName =~ "esentutl.exe" and ProcessCommandLine has_any ("sam", "ntds"))
+    )
+    | project
+        Timestamp,
+        Technique = "SAM Database Dump",
+        DeviceName,
+        AccountName,
+        CommandLine = ProcessCommandLine,
+        InitiatingProcess = InitiatingProcessFileName,
+        FileName;
+
+let NtdsDump =
+    DeviceProcessEvents
+    | where Timestamp > ago(7d)
+    | where (
+        // ntdsutil snapshot or IFM creation
+        (FileName =~ "ntdsutil.exe" and ProcessCommandLine has_any ("ifm", "snapshot", "ac i ntds"))
+        // vssadmin / diskshadow used to shadow copy NTDS.dit
+        or (FileName in~ ("vssadmin.exe", "diskshadow.exe") and ProcessCommandLine has_any ("ntds", "create shadow"))
+        // direct command line reference to ntds.dit
+        or ProcessCommandLine has "ntds.dit"
+        // esentutl defrag/repair on ntds
+        or (FileName =~ "esentutl.exe" and ProcessCommandLine has "ntds")
+    )
+    | project
+        Timestamp,
+        Technique = "NTDS.dit Access",
+        DeviceName,
+        AccountName,
+        CommandLine = ProcessCommandLine,
+        InitiatingProcess = InitiatingProcessFileName,
+        FileName;
+
+let NtdsFileAccess =
+    DeviceFileEvents
+    | where Timestamp > ago(7d)
+    | where FolderPath has_any ("ntds.dit", "\\windows\\ntds\\")
+    | where ActionType in ("FileCreated", "FileCopied", "FileRenamed")
+    | project
+        Timestamp,
+        Technique = "NTDS.dit File Access",
+        DeviceName,
+        AccountName = InitiatingProcessAccountName,
+        CommandLine = InitiatingProcessCommandLine,
+        InitiatingProcess = InitiatingProcessFileName,
+        FileName;
+
+union LsassMemoryAccess, SamDump, NtdsDump, NtdsFileAccess
+| sort by Timestamp desc
+| project Timestamp, Technique, DeviceName, AccountName, CommandLine, InitiatingProcess, FileName

@@ -1,0 +1,24 @@
+DeviceFileEvents
+| where Timestamp > ago(7d)
+| where DeviceOs == "macOS" or OSPlatform == "macOS"
+| where ActionType in ("FileCreated", "FileModified", "FileRenamed")
+| where FolderPath has_any (
+    "/Library/LaunchAgents/",
+    "/Library/LaunchDaemons/",
+    "/System/Library/LaunchAgents/",
+    "/System/Library/LaunchDaemons/",
+    "~/Library/LaunchAgents/"
+)
+| where FileName endswith ".plist"
+| project
+    Timestamp,
+    DeviceName,
+    PlistPath = strcat(FolderPath, "/", FileName),
+    ActionType,
+    InitiatingProcessFileName,
+    InitiatingProcessFolderPath,
+    InitiatingProcessCommandLine,
+    InitiatingProcessAccountName,
+    InitiatingProcessSHA256,
+    ReportId
+| order by Timestamp desc

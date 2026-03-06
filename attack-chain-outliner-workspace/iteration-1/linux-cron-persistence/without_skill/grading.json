@@ -1,0 +1,46 @@
+{
+  "expectations": [
+    {
+      "text": "Document contains all 8 required section headings: Technique Overview, Attack Steps, Detection Opportunities, Data Sources & Log Fields, Pseudocode Queries, and MITRE ATT&CK Mapping",
+      "passed": false,
+      "evidence": "The document uses a stage-based narrative structure ('Attack Chain' with Stages 1-6) rather than the required section schema. 'Technique Overview' is absent (replaced by 'Overview' at line 3). 'Attack Steps' is absent (replaced by multi-stage 'Attack Chain'). 'Data Sources & Log Fields' is absent — log sources appear only as a brief subsection under 'Detection Opportunities' (line 183). 'Pseudocode Queries' is entirely absent. 'MITRE ATT&CK Mapping' is not a standalone section — the mapping is embedded in the 'Overview' block (lines 7-10). Only 'Detection Opportunities' matches a required heading."
+    },
+    {
+      "text": "References T1053.003 specifically (Scheduled Task/Job: Cron)",
+      "passed": true,
+      "evidence": "T1053.003 is explicitly referenced at line 9 ('Technique: Scheduled Task/Job: Cron (T1053.003)') and in the References section at line 234 as a MITRE ATT&CK link."
+    },
+    {
+      "text": "At least one detection method is labeled with High, Medium, or Low fidelity",
+      "passed": false,
+      "evidence": "No detection method in the document is labeled with 'High', 'Medium', or 'Low' fidelity. The Detection Opportunities section (lines 156-197) uses plain categories ('File System', 'Process Behavior', 'Command-Line Indicators', 'Log Sources') without any fidelity classification."
+    },
+    {
+      "text": "Data sources section mentions auditd or journald or syslog as Linux-specific log sources",
+      "passed": true,
+      "evidence": "The Detection Opportunities 'Log Sources' subsection (line 183) lists '/var/log/syslog or /var/log/cron', '/var/log/auth.log', and 'Auditd rules on cron file paths'. Example auditd rules are also provided (lines 192-197)."
+    },
+    {
+      "text": "Pseudocode queries use UDM-style field names like event.type, process.name, file.path rather than vendor-specific syntax",
+      "passed": false,
+      "evidence": "The document has no 'Pseudocode Queries' section. Detection examples (lines 176-197) are written as plain command-line patterns and raw auditd rule syntax (e.g., '-w /etc/cron.d/ -p wa -k cron_persistence'), not UDM-style pseudocode with dotted field names."
+    }
+  ],
+  "summary": {
+    "passed": 2,
+    "failed": 3,
+    "total": 5,
+    "pass_rate": 0.4
+  },
+  "claims": [],
+  "eval_feedback": {
+    "suggestions": [
+      "Restructure using the required section headings: Technique Overview, Attack Steps, Detection Opportunities, Data Sources & Log Fields, Pseudocode Queries, MITRE ATT&CK Mapping.",
+      "Add a standalone Pseudocode Queries section with UDM-style dotted field name syntax.",
+      "Add fidelity labels (High/Medium/Low) to each detection method.",
+      "Move the MITRE ATT&CK mapping into its own top-level section rather than embedding it in the overview.",
+      "Add a dedicated Data Sources & Log Fields section separate from Detection Opportunities."
+    ],
+    "overall": "Below threshold. The document covers the attack technique well with good operational detail and code examples, but fails structural compliance on 3 of 5 assertions. It lacks the required section schema, fidelity classification, and UDM-style pseudocode queries."
+  }
+}

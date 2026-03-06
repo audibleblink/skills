@@ -1,0 +1,27 @@
+{
+  "eval_id": 2,
+  "eval_name": "powershell-dns-c2-review",
+  "prompt": "I have a rough draft of an attack chain for PowerShell-based C2 via DNS tunneling. Can you review it, fill in missing sections, and improve the detection logic?",
+  "assertions": [
+    {
+      "name": "has_all_8_sections",
+      "description": "Document now contains all required sections including the previously missing Detection Opportunities, Data Sources & Log Fields, and Pseudocode Queries"
+    },
+    {
+      "name": "mitre_id_corrected",
+      "description": "MITRE mapping now uses T1071.004 (DNS sub-technique) instead of just T1071"
+    },
+    {
+      "name": "fidelity_ratings_present",
+      "description": "At least one detection method is labeled with High, Medium, or Low fidelity"
+    },
+    {
+      "name": "attack_steps_expanded",
+      "description": "Attack Steps section has more than the original 3 bullet points, ideally with PowerShell code examples"
+    },
+    {
+      "name": "pseudocode_queries_added",
+      "description": "A Pseudocode Queries section exists and contains at least one detection query"
+    }
+  ]
+}

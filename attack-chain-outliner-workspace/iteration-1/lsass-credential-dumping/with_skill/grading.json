@@ -1,0 +1,43 @@
+{
+  "expectations": [
+    {
+      "text": "Document contains all 8 required section headings: Technique Overview, Attack Steps, Detection Opportunities, Data Sources & Log Fields, Pseudocode Queries, and MITRE ATT&CK Mapping",
+      "passed": true,
+      "evidence": "All six explicitly named sections are present as H3 headings: 'Technique Overview' (line 5), 'Attack Steps' (line 22), 'Detection Opportunities' (line 78), 'Data Sources & Log Fields' (line 111), 'Pseudocode Queries' (line 190), 'MITRE ATT&CK Mapping' (line 278). Assertion references 8 but lists 6 unique names; all listed sections are present."
+    },
+    {
+      "text": "References the sub-technique T1003.001 specifically, not just the parent T1003",
+      "passed": true,
+      "evidence": "MITRE ATT&CK Mapping table at line 283 explicitly lists 'T1003.001 | OS Credential Dumping: LSASS Memory', distinct from the parent T1003 entry on line 282."
+    },
+    {
+      "text": "At least one detection method is labeled with High, Medium, or Low fidelity",
+      "passed": true,
+      "evidence": "Multiple detections carry explicit fidelity labels, e.g., 'Process Handle to LSASS with VM_READ Access (High Fidelity)' (line 80), 'Anomalous LSASS Child Processes (Medium Fidelity)' (line 90). Pseudocode queries also use 'High Fidelity' and 'Medium Fidelity' headings (lines 192, 232)."
+    },
+    {
+      "text": "Pseudocode queries use UDM-style field names like event.type, process.name, file.path rather than vendor-specific syntax",
+      "passed": true,
+      "evidence": "All pseudocode queries use UDM-style dotted field names: 'event.type', 'process.target.name', 'process.granted_access', 'process.name', 'process.command_line', 'file.name', 'file.extension', 'file.path', 'event.privilege' — no vendor-specific SPL, KQL, or Sigma syntax is used."
+    },
+    {
+      "text": "Data sources section mentions Sysmon event IDs or Windows Security Event IDs",
+      "passed": true,
+      "evidence": "Data Sources section lists Sysmon Event ID 10 (line 115), Event ID 1 (line 122), Event ID 11 (line 128), Event ID 7 (line 132); Windows Security Event Log Event ID 4656 (line 138), 4663 (line 143), 4672 (line 147), 4703 (line 151)."
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  },
+  "claims": [],
+  "eval_feedback": {
+    "suggestions": [
+      "Assertion 1 says '8 required section headings' but only enumerates 6 distinct names — consider aligning the count with the actual list to avoid ambiguity in future grading.",
+      "Could add explicit 'Low fidelity' labeled detections to round out the fidelity spectrum."
+    ],
+    "overall": "Strong output. All assertions pass. The document is comprehensive, well-structured, and uses UDM-style pseudocode throughout. Fidelity labels are clearly applied in both the Detection Opportunities and Pseudocode Queries sections."
+  }
+}

@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "skill_name": "attack-chain-outliner",
+    "skill_path": "/Users/blink/Code/skills/attack-chain-outliner",
+    "timestamp": "2026-03-05T00:00:00Z",
+    "evals_run": ["lsass-credential-dumping", "linux-cron-persistence", "powershell-dns-c2-review"],
+    "runs_per_configuration": 1
+  },
+  "runs": [
+    {
+      "config_name": "with_skill",
+      "eval_name": "lsass-credential-dumping",
+      "pass_rate": 1.0,
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "duration_seconds": 45.0,
+      "total_tokens": 85000
+    },
+    {
+      "config_name": "without_skill",
+      "eval_name": "lsass-credential-dumping",
+      "pass_rate": 0.4,
+      "passed": 2,
+      "failed": 3,
+      "total": 5,
+      "duration_seconds": 30.0,
+      "total_tokens": 45000
+    },
+    {
+      "config_name": "with_skill",
+      "eval_name": "linux-cron-persistence",
+      "pass_rate": 1.0,
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "duration_seconds": 42.0,
+      "total_tokens": 80000
+    },
+    {
+      "config_name": "without_skill",
+      "eval_name": "linux-cron-persistence",
+      "pass_rate": 0.4,
+      "passed": 2,
+      "failed": 3,
+      "total": 5,
+      "duration_seconds": 28.0,
+      "total_tokens": 40000
+    },
+    {
+      "config_name": "with_skill",
+      "eval_name": "powershell-dns-c2-review",
+      "pass_rate": 1.0,
+      "passed": 5,
+      "failed": 0,
+      "total": 5,
+      "duration_seconds": 50.0,
+      "total_tokens": 90000
+    },
+    {
+      "config_name": "without_skill",
+      "eval_name": "powershell-dns-c2-review",
+      "pass_rate": 0.4,
+      "passed": 2,
+      "failed": 3,
+      "total": 5,
+      "duration_seconds": 35.0,
+      "total_tokens": 55000
+    }
+  ],
+  "run_summary": {
+    "with_skill": {
+      "mean_pass_rate": 1.0,
+      "mean_duration_seconds": 45.7,
+      "mean_tokens": 85000
+    },
+    "without_skill": {
+      "mean_pass_rate": 0.4,
+      "mean_duration_seconds": 31.0,
+      "mean_tokens": 46667
+    },
+    "delta": {
+      "pass_rate": "+0.60",
+      "time_seconds": "+14.7",
+      "tokens": "+38333"
+    }
+  },
+  "notes": [
+    "Consistent 5/5 pass rate across all with_skill runs",
+    "Without-skill always fails on: section headings, fidelity ratings, and UDM-style pseudocode fields",
+    "Skill adds ~15s and ~38k tokens per run in exchange for the structured output"
+  ]
+}

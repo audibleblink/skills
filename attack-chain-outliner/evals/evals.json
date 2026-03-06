@@ -1,0 +1,89 @@
+{
+  "skill_name": "attack-chain-outliner",
+  "evals": [
+    {
+      "id": 0,
+      "prompt": "Document the LSASS memory dumping technique used by attackers to steal Windows credentials. I want Markdown format.",
+      "expected_output": "A complete Markdown attack chain document with all 8 required sections: Technique Overview, Attack Steps, Detection Opportunities (with fidelity ratings), Data Sources & Log Fields, Pseudocode Queries, and MITRE ATT&CK Mapping table. Should map to T1003.001 (OS Credential Dumping: LSASS Memory) and cover Windows-specific data sources like Sysmon and Windows Event Logs.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "has_all_8_sections",
+          "description": "Document contains all 8 required section headings: Technique Overview, Attack Steps, Detection Opportunities, Data Sources & Log Fields, Pseudocode Queries, and MITRE ATT&CK Mapping"
+        },
+        {
+          "name": "correct_mitre_id",
+          "description": "References the sub-technique T1003.001 specifically, not just the parent T1003"
+        },
+        {
+          "name": "fidelity_ratings_present",
+          "description": "At least one detection method is labeled with High, Medium, or Low fidelity"
+        },
+        {
+          "name": "pseudocode_uses_udm_fields",
+          "description": "Pseudocode queries use UDM-style field names like event.type, process.name, file.path rather than vendor-specific syntax"
+        },
+        {
+          "name": "windows_datasources_present",
+          "description": "Data sources section mentions Sysmon event IDs or Windows Security Event IDs"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "prompt": "Write up an attack chain document for cron-based persistence on Linux servers. Use Markdown format.",
+      "expected_output": "A complete Markdown attack chain document covering Linux cron persistence (T1053.003). Should include all 8 template sections with Linux-specific data sources (auditd, syslog/journald), detection logic for suspicious cron entries, and pseudocode queries using the standard UDM-style field names.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "has_all_8_sections",
+          "description": "Document contains all 8 required section headings: Technique Overview, Attack Steps, Detection Opportunities, Data Sources & Log Fields, Pseudocode Queries, and MITRE ATT&CK Mapping"
+        },
+        {
+          "name": "correct_mitre_id",
+          "description": "References T1053.003 specifically (Scheduled Task/Job: Cron)"
+        },
+        {
+          "name": "fidelity_ratings_present",
+          "description": "At least one detection method is labeled with High, Medium, or Low fidelity"
+        },
+        {
+          "name": "linux_datasources_present",
+          "description": "Data sources section mentions auditd or journald or syslog as Linux-specific log sources"
+        },
+        {
+          "name": "pseudocode_uses_udm_fields",
+          "description": "Pseudocode queries use UDM-style field names like event.type, process.name, file.path rather than vendor-specific syntax"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I have a rough draft of an attack chain for PowerShell-based C2 via DNS tunneling. Can you review it, fill in missing sections, and improve the detection logic?\n\n---\n# Command and Control\n\n## DNS Tunneling via PowerShell\n\n### Technique Overview\n\nAdversaries use DNS tunneling to encode C2 traffic inside DNS queries and responses. PowerShell is commonly used on Windows to implement this. DNS is usually allowed through firewalls which makes it attractive for exfiltration and C2.\n\n### Attack Steps\n\n1. Attacker sets up authoritative DNS server for a domain they control\n2. Malware on victim encodes data into DNS queries (subdomains)\n3. Responses carry encoded data back\n\n### MITRE ATT&CK Mapping\n\n| Tactic | Technique ID | Technique Name |\n|--------|--------------|----------------|\n| Command and Control | T1071 | Application Layer Protocol |\n---",
+      "expected_output": "A fully completed version of the attack chain with all missing sections added: Detection Opportunities with fidelity ratings, Data Sources & Log Fields with specific DNS/network log fields, and Pseudocode Queries. MITRE mapping should be corrected/expanded (T1071.004 for DNS specifically, possibly T1132 for encoding). Attack Steps should be expanded with specific PowerShell code examples.",
+      "files": [],
+      "assertions": [
+        {
+          "name": "has_all_8_sections",
+          "description": "Document now contains all required sections including the previously missing Detection Opportunities, Data Sources & Log Fields, and Pseudocode Queries"
+        },
+        {
+          "name": "mitre_id_corrected",
+          "description": "MITRE mapping now uses T1071.004 (DNS sub-technique) instead of just T1071"
+        },
+        {
+          "name": "fidelity_ratings_present",
+          "description": "At least one detection method is labeled with High, Medium, or Low fidelity"
+        },
+        {
+          "name": "attack_steps_expanded",
+          "description": "Attack Steps section has more than the original 3 bullet points, ideally with PowerShell code examples"
+        },
+        {
+          "name": "pseudocode_queries_added",
+          "description": "A Pseudocode Queries section exists and contains at least one detection query"
+        }
+      ]
+    }
+  ]
+}

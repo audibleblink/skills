@@ -18,14 +18,6 @@ uv tool install notebooklm-py
 
 ## Prerequisites
 
-**IMPORTANT:** Before using any command, you MUST ensure your are authenticated:
-
-```bash
-notebooklm list           # Verify authentication works
-```
-
-If commands fail with authentication errors, re-run `notebooklm login`.
-
 ### CI/CD, Multiple Accounts, and Parallel Agents
 
 For automated environments, multiple accounts, or parallel agent workflows:

@@ -1,6 +1,6 @@
 ---
 name: kql-mde-xdr
-description: Write and optimize KQL queries for Microsoft Defender (MDE), Sentinel, and Microsoft 365 Defender XDR. Use when threat hunting, writing detection rules, investigating incidents, or analyzing security data with KQL.
+description: Write, optimize, and debug KQL (Kusto Query Language) queries for Microsoft Defender for Endpoint (MDE), Microsoft Sentinel, and Microsoft 365 Defender XDR. ALWAYS use this skill when the user mentions DeviceProcessEvents, DeviceFileEvents, DeviceNetworkEvents, DeviceLogonEvents, DeviceRegistryEvents, AlertInfo, or any MDE/Sentinel table names. Use for threat hunting queries, detection rules, incident investigation, IOC hunting, MITRE ATT&CK detections, query optimization, or converting SPL/other query languages to KQL. Trigger on phrases like "write a KQL query", "defender query", "sentinel query", "hunt for", "detection rule", "M365 defender", or any security analysis involving Microsoft security products.
 refs:
   - references/*.md
 ---

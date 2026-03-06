@@ -1,6 +1,6 @@
 ---
 name: notebooklm
-description: Complete API for Google NotebookLM - full programmatic access including features not in the web UI. Create notebooks, add sources, generate all artifact types, download in multiple formats. Activates on explicit /notebooklm or intent like "create a podcast about X"
+description: Automate Google NotebookLM to create AI-generated podcasts, audio overviews, study guides, FAQs, briefing docs, and deep dive analyses from sources like YouTube videos, PDFs, URLs, audio files, and images. ALWAYS use this skill when the user wants to "create a podcast", "make an audio overview", "generate a study guide", or turn content into a conversational audio format with AI hosts. Also triggers on "notebooklm", "audio briefing", "podcast about", "deep dive from", or requests to chat with/query multiple documents as a unified knowledge base. Does NOT apply to simple transcription, TTS, audio editing, or basic summarization.
 ---
 <!-- notebooklm-py v0.3.2 -->
 

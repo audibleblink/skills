@@ -1,6 +1,6 @@
 ---
 name: typst-copilot
-description: Typst document creation, editing, and compilation assistant. Use when (1) creating Typst documents, (2) converting Markdown/LaTeX to Typst, (3) compiling .typ files to PDF, (4) debugging layout/page flow issues, (5) answering Typst syntax questions.
+description: Typst (.typ) document assistant for creation, layout debugging, compilation, and format conversion. Use this skill whenever (1) user mentions "Typst", ".typ files", or Typst syntax patterns (#figure, #table, #set, #show), (2) creating any document type in Typst - papers, reports, resumes, CVs, presentations, slides, (3) struggling with layout - figures floating to wrong places, page breaks cutting off content, columns not working, elements mispositioned, (4) document structure issues - TOC page numbers wrong, headers not updating, show rules misbehaving, (5) compiling Typst to PDF or hitting build errors ("unknown variable", syntax errors), (6) converting or migrating from LaTeX/Markdown to Typst. This skill is the go-to for anything Typst-related. If the problem involves .typ files or Typst-specific concepts, use this skill.
 ---
 
 # Typst Copilot

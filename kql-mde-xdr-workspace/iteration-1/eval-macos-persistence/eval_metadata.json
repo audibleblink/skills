@@ -1,6 +1,0 @@
-{
-  "eval_id": 0,
-  "eval_name": "macos-persistence",
-  "prompt": "Write a KQL query to detect suspicious LaunchAgent or LaunchDaemon persistence on macOS devices in MDE. I want to see the plist path, what property was modified, and the process that made the change.",
-  "assertions": []
-}

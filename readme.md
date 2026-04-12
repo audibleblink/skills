@@ -25,7 +25,7 @@ Semantic code search, and call graph analysis with GrepAI. Use when (1) searchin
 **Location:** `grepai/SKILL.md`
 
 ### kql-mde-xdr
-Write and optimize KQL queries for Microsoft Defender (MDE), Sentinel, and Microsoft 365 Defender XDR. Use when threat hunting, writing detection rules, investigating incidents, or analyzing security data with KQL.
+Write, optimize, and debug KQL (Kusto Query Language) queries for Microsoft Defender for Endpoint (MDE), Microsoft Sentinel, and Microsoft 365 Defender XDR. ALWAYS use this skill when the user mentions DeviceProcessEvents, DeviceFileEvents, DeviceNetworkEvents, DeviceLogonEvents, DeviceRegistryEvents, AlertInfo, or any MDE/Sentinel table names. Use for threat hunting queries, detection rules, incident investigation, IOC hunting, MITRE ATT&CK detections, query optimization, or converting SPL/other query languages to KQL. Trigger on phrases like "write a KQL query", "defender query", "sentinel query", "hunt for", "detection rule", "M365 defender", or any security analysis involving Microsoft security products.
 
 **Location:** `kql-mde-xdr/SKILL.md`
 
@@ -35,7 +35,7 @@ Build MCP (Model Context Protocol) servers that connect LLMs to external APIs an
 **Location:** `mcp-builder/SKILL.md`
 
 ### notebooklm
-Complete API for Google NotebookLM - full programmatic access including features not in the web UI. Create notebooks, add sources, generate all artifact types, download in multiple formats. Activates on explicit /notebooklm or intent like "create a podcast about X"
+Automate Google NotebookLM to create AI-generated podcasts, audio overviews, study guides, FAQs, briefing docs, and deep dive analyses from sources like YouTube videos, PDFs, URLs, audio files, and images. ALWAYS use this skill when the user wants to "create a podcast", "make an audio overview", "generate a study guide", or turn content into a conversational audio format with AI hosts. Also triggers on "notebooklm", "audio briefing", "podcast about", "deep dive from", or requests to chat with/query multiple documents as a unified knowledge base. Does NOT apply to simple transcription, TTS, audio editing, or basic summarization.
 
 **Location:** `notebooklm/SKILL.md`
 
@@ -50,12 +50,12 @@ Transform learning content (like YouTube transcripts, articles, tutorials) into 
 **Location:** `ship-learn-next/SKILL.md`
 
 ### skill-creator
-Guide for creating effective skills. This skill should be used when users want to create a new skill (or update an existing skill) that extends Claude's capabilities with specialized knowledge, workflows, or tool integrations.
+Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, update or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy.
 
 **Location:** `skill-creator/SKILL.md`
 
 ### typst-copilot
-Typst document creation, editing, and compilation assistant. Use when (1) creating Typst documents, (2) converting Markdown/LaTeX to Typst, (3) compiling .typ files to PDF, (4) debugging layout/page flow issues, (5) answering Typst syntax questions.
+Typst (.typ) document assistant for creation, layout debugging, compilation, and format conversion. Use this skill whenever (1) user mentions "Typst", ".typ files", or Typst syntax patterns (#figure, #table, #set, #show), (2) creating any document type in Typst - papers, reports, resumes, CVs, presentations, slides, (3) struggling with layout - figures floating to wrong places, page breaks cutting off content, columns not working, elements mispositioned, (4) document structure issues - TOC page numbers wrong, headers not updating, show rules misbehaving, (5) compiling Typst to PDF or hitting build errors ("unknown variable", syntax errors), (6) converting or migrating from LaTeX/Markdown to Typst. This skill is the go-to for anything Typst-related. If the problem involves .typ files or Typst-specific concepts, use this skill.
 
 **Location:** `typst-copilot/SKILL.md`
 

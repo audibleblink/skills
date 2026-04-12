@@ -1,6 +1,0 @@
-{
-  "eval_id": 2,
-  "eval_name": "ioc-pivot",
-  "prompt": "I have a suspicious IP address: 185.234.219.47. Write KQL to pivot across all relevant MDE tables to find any device that connected to it, any alerts linked to it, and any user accounts involved. Correlate everything into one result set.",
-  "assertions": []
-}

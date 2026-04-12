@@ -3,9 +3,59 @@ name: obsidian-vault
 description: Write and edit Obsidian vault notes using Obsidian-flavored Markdown. Use when (1) creating new .md notes for an Obsidian vault, (2) editing existing Obsidian notes, (3) adding properties/frontmatter, wikilinks, callouts, embeds, tags, or other Obsidian-specific syntax, (4) converting standard Markdown to Obsidian format, (5) creating presentation slides for Obsidian Slides Extended (reveal.js), or (6) any task involving Obsidian Markdown formatting.
 ---
 
-# Obsidian Vault Note Formatting
+# Obsidian Vault
 
 Write notes and presentation slides using Obsidian-flavored Markdown: CommonMark + GFM + Obsidian extensions.
+
+## CLI vs File Editing
+
+**Prefer the CLI** (`obsidian` command) for all vault operations — it respects Obsidian's internal state (link resolution, sync, templates, active file context). Most actions can also be done by directly reading/writing `.md` files when the CLI is unavailable or insufficient.
+
+### CLI Syntax
+
+Run `obsidian help <command>` to discover any command's parameters.
+
+**Parameters:** `parameter=value`. Quote values with spaces: `content="Hello world"`.  
+**Flags:** boolean switches — just include them to enable (e.g. `open`, `overwrite`).  
+**Multiline content:** use `\n` for newlines, `\t` for tabs.
+
+**Targeting a vault** — place before the command; defaults to the working directory's vault or the active vault:
+```shell
+obsidian vault=Notes daily
+obsidian vault="My Vault" search query="test"
+```
+
+**Targeting a file:**
+- `file=<name>` — resolves by filename (wiki-link logic, no extension needed)
+- `path=<path>` — full path from vault root (e.g. `folder/note.md`)
+- Omit both to target the active file
+
+**Copy output to clipboard:** append `--copy` to any command.
+
+### Behavioral Notes
+
+- **`daily:path`** — returns the expected path even if the file doesn't exist yet.
+- **`diff`** — versions are numbered newest-first (1 = most recent).
+- **`prepend`** — inserts after frontmatter, not at the very top.
+- **`rename`** — omitting the extension preserves the original. Use `move` to rename and relocate simultaneously. Both auto-update internal links if enabled in vault settings.
+- **`template:read resolve`** — resolves `{{date}}`, `{{time}}`, `{{title}}`; use `title=<title>` to supply the value.
+- **`orphans` / `deadends`** — markdown files only by default; add `all` for non-markdown.
+
+### Common CLI Examples
+
+```shell
+obsidian daily                                          # open today's daily note
+obsidian daily:append content="- [ ] Buy groceries"    # append task to daily note
+obsidian search query="meeting notes"                  # search vault
+obsidian read file=Recipe                              # read a file
+obsidian tasks daily                                   # list tasks in daily note
+obsidian create name="Trip to Paris" template=Travel   # create from template
+obsidian tags counts                                   # list tags with counts
+obsidian diff file=README from=2 to=1                  # compare versions
+obsidian eval code="app.vault.getFiles().length"       # run JavaScript in app
+```
+
+---
 
 ## Vault Orientation (Do Once Per Session)
 
@@ -17,7 +67,7 @@ Before creating or editing any note, orient yourself to the vault's conventions.
 4. **Sample recent notes** — scan 10–15 notes for tag style, frontmatter fields, filename patterns, linking conventions
 5. **Store in working memory** — apply what you learn to every note you create or edit
 
-### This Vault's Conventions (Personal Vault at `/Users/blink/Vaults/Personal`)
+### This Vault's Conventions (Personal Vault at `~/Vaults/Personal`)
 
 **Folder structure:** PARA-style — `Notes/` (flat, all notes live here), `Journals/`, `Templates/`, plus top-level index files (`1. Projects.md`, `2. Areas.md`, etc.)
 

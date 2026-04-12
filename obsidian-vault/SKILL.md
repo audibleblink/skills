@@ -7,6 +7,64 @@ description: Write and edit Obsidian vault notes using Obsidian-flavored Markdow
 
 Write notes and presentation slides using Obsidian-flavored Markdown: CommonMark + GFM + Obsidian extensions.
 
+## Vault Orientation (Do Once Per Session)
+
+Before creating or editing any note, orient yourself to the vault's conventions. Do not ask the user — discover it.
+
+1. **Confirm vault root** — look for `.obsidian/` directory
+2. **Map top-level folders** — note the organizational system (PARA, Zettelkasten, etc.)
+3. **Read templates** — check `Templates/` for frontmatter schema and content patterns
+4. **Sample recent notes** — scan 10–15 notes for tag style, frontmatter fields, filename patterns, linking conventions
+5. **Store in working memory** — apply what you learn to every note you create or edit
+
+### This Vault's Conventions (Personal Vault at `/Users/blink/Vaults/Personal`)
+
+**Folder structure:** PARA-style — `Notes/` (flat, all notes live here), `Journals/`, `Templates/`, plus top-level index files (`1. Projects.md`, `2. Areas.md`, etc.)
+
+**Filename convention:** `YYYYMMDD-kebab-case-title.md`
+- Example: `20260412-stanford-cs230-agents-prompts-rag.md`
+- Use today's date for new notes
+
+**Frontmatter schema:**
+```yaml
+---
+title: Human-readable title string
+areas:
+  - "[[AreaNote|📍 AreaNote]]"
+tags:
+  - resource/videos
+archived: false
+source: https://...          # optional — URL of origin
+author: Name                 # optional — creator/speaker
+host: Name                   # optional — for interviews/podcasts
+---
+```
+
+**`areas` field:** Links to index notes in the vault root using their emoji alias. Common values:
+- `"[[AI|📍 AI]]"`, `"[[Hacking|📍 Hacking]]"`, `"[[Programming|📍 Programming]]"`
+- `"[[macOS|📍 macOS]]"`, `"[[Astrophotography|📍 Astrophotography]]"`, `"[[Camping|📍 Camping]]"`
+- `"[[Default]]"` — use when no specific area applies
+
+**Tag taxonomy** (`resource/` namespace for content notes):
+- `resource/videos` — YouTube videos, recorded talks
+- `resource/lectures` — course lectures, academic content
+- `resource/reference` — technical reference, how-to notes
+- `resource/books` — book notes
+- `resource/articles` — articles, blog posts
+- `resource/podcasts` — podcast episodes
+- `resource/meetings` — meeting notes
+- `area` — area index notes
+- `project` — project notes
+
+**H1 heading pattern:** Always a self-wikilink using the filename as the link target:
+```md
+# [[20260412-my-note|Display Title]]
+```
+
+**`archived: false`** — always include this field; set to `true` only when archiving.
+
+---
+
 ## Reference Files
 
 Detailed syntax for each topic in `references/`:
@@ -95,24 +153,38 @@ Use slide format when user:
 
 ### Frontmatter
 
-Always include YAML frontmatter when creating notes. At minimum, include relevant tags:
+Always include YAML frontmatter matching the vault's schema. For this vault:
 
 ```yaml
 ---
+title: Note Title
+areas:
+  - "[[AI|📍 AI]]"
 tags:
-  - topic
-aliases:
-  - alternate-name
+  - resource/videos
+archived: false
+source: https://example.com   # include when note has an origin URL
+author: Author Name           # include for video/book/article notes
 ---
 ```
 
-Use `aliases` to make the note discoverable under different names when linking. Use `cssclasses` only when specific styling is needed.
+Do not add `aliases` unless the note genuinely needs to be found under a different name — it is rarely used in practice in this vault.
 
 Internal links in properties must be quoted: `link: "[[Target Note]]"`.
+
+### H1 Heading
+
+The first heading is always a self-wikilink using the filename (without `.md`) as the link target and the display title as the alias:
+
+```md
+# [[20260412-my-note|My Note Title]]
+```
 
 ### Linking
 
 Prefer wikilinks: `[[Note Name]]`. Use display text for clarity: `[[Note Name|readable text]]`.
+
+Before linking to a note, verify it exists in the vault. If it doesn't exist, mention it as a candidate for creation rather than creating a broken link.
 
 Link to headings: `[[Note#Heading]]`. Link to blocks: `[[Note#^block-id]]`.
 
@@ -141,7 +213,7 @@ Embed notes, headings, blocks, images, audio, and PDFs:
 
 ### Tags
 
-Use inline `#tags` in note body or `tags` property in frontmatter. Nest with `/`: `#area/project`.
+Use the `tags` property in frontmatter. Use the `resource/` namespace for content notes — pick the most specific type that applies (`resource/videos`, `resource/lectures`, `resource/reference`, etc.).
 
 Tags must contain at least one non-numeric character. Case-insensitive.
 
@@ -165,3 +237,5 @@ Escape `|` with `\|` inside cells when using wikilinks or image sizing:
 6. **Inline footnotes** — `^[text]` only render in Reading view, not Live Preview
 7. **Mermaid diagrams** — use `internal-link` class on nodes to link to vault notes
 8. **Nested code blocks** — outer fence must use more backtick/tilde characters than inner
+9. **Filename convention** — use `YYYYMMDD-kebab-case.md` for new notes in this vault
+10. **`archived` field** — always include `archived: false`; never omit it

@@ -1,30 +1,109 @@
 ---
 name: hindsight-memory-api
 description: >
-  Build AI agents with persistent, semantic memory using the Hindsight HTTP API
-  (hindsight.vectorize.io). Use this skill whenever you need to integrate memory
-  into an AI agent or application — storing conversation history, recalling facts,
-  generating memory-grounded answers, or managing per-user memory banks. Invoke
-  this skill when the user mentions Hindsight, memory banks, retain/recall/reflect,
-  agent memory, vectorize.io, or wants to give an AI system persistent memory that
-  accumulates over time. Also use when users ask how to make a chatbot "remember"
-  things across sessions, build a personal AI assistant with long-term context,
-  or store structured knowledge from documents into a searchable memory store.
+  Store, access, and reflect upon agentic memories using the Hindsight API
+  (hindsight.vectorize.io). Use this skill whenever you need to store or
+  retrieve persistent memory across sessions — storing conversation history,
+  recalling facts, generating memory-grounded answers, or managing per-user
+  memory banks. Invoke this skill when the user mentions Hindsight, memory
+  banks, retain/recall/reflect, agent memory, vectorize.io, or wants to give
+  an AI system persistent memory that accumulates over time. Also use when
+  users ask how to make a chatbot "remember" things across sessions, build a
+  personal AI assistant with long-term context, or store structured knowledge
+  from documents into a searchable memory store.
 ---
 
-# Hindsight Memory API
+# Hindsight Memory API — Agent Operations Guide
 
-**Base URL:** `https://hindsight.vectorize.io`  
-**Auth:** Pass your API key in the `authorization` header on every request.  
+**Base URL:** `https://hindsight.vectorize.io`
+**Auth:** `Authorization: YOUR_API_KEY` header on every request
 **OpenAPI spec:** `https://hindsight.vectorize.io/openapi.json`
 
-Hindsight is a memory-as-a-service API for AI agents. The core loop is:
+You are an agent calling this API directly. Use `curl` via bash for most
+operations. For complex tasks (file ingestion, batch processing), write a
+short JIT Python script and run it.
 
-1. **Retain** — feed text in; Hindsight extracts semantic facts automatically
-2. **Recall** — semantic search over stored facts
-3. **Reflect** — LLM-powered Q&A grounded in the stored memories
+If no API key has been provided, ask the user: "What's your Hindsight API key?"
 
-Everything is organized into **memory banks** — one bank per user or agent.
+---
+
+## Agent Workflow
+
+Think of memory as a three-verb loop:
+
+| Verb | When to use |
+|------|-------------|
+| **Retain** | After learning something worth keeping — new facts, preferences, decisions, completed tasks |
+| **Recall** | Before answering a question — pull relevant context from stored memory |
+| **Reflect** | When synthesis is needed — Hindsight's LLM answers the question using stored memory (saves you a separate LLM call) |
+
+**Typical session flow:**
+1. User message arrives → **Recall** relevant memories to ground your response
+2. After responding → **Retain** anything new and worth remembering
+3. For "what do you know about X?" type questions → **Reflect** directly
+
+---
+
+## Quick Reference — Curl Examples
+
+Replace `$BANK`, `$KEY`, and query text as appropriate.
+
+### Retain (store new memories)
+```bash
+curl -s -X POST "https://hindsight.vectorize.io/v1/default/banks/$BANK/memories" \
+  -H "authorization: $KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "items": [{
+      "content": "The user prefers dark mode and uses Neovim as their editor.",
+      "context": "user preferences",
+      "document_id": "prefs_001",
+      "tags": ["preferences"]
+    }],
+    "async": false
+  }'
+```
+
+### Recall (semantic search)
+```bash
+curl -s -X POST "https://hindsight.vectorize.io/v1/default/banks/$BANK/memories/recall" \
+  -H "authorization: $KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "query": "What editor does the user prefer?",
+    "budget": "mid",
+    "max_tokens": 2048
+  }'
+```
+
+### Reflect (memory-grounded Q&A — Hindsight answers for you)
+```bash
+curl -s -X POST "https://hindsight.vectorize.io/v1/default/banks/$BANK/reflect" \
+  -H "authorization: $KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "query": "Summarize what you know about the user'\''s technical preferences.",
+    "budget": "mid"
+  }'
+```
+
+### List banks (find existing bank IDs)
+```bash
+curl -s "https://hindsight.vectorize.io/v1/default/banks" \
+  -H "authorization: $KEY"
+```
+
+### Create or update a bank
+```bash
+curl -s -X PUT "https://hindsight.vectorize.io/v1/default/banks/$BANK" \
+  -H "authorization: $KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "reflect_mission": "You are a personal assistant. Use stored memories to give personalized, helpful answers.",
+    "retain_mission": "Focus on preferences, decisions, and action items. Ignore pleasantries.",
+    "retain_extraction_mode": "concise"
+  }'
+```
 
 ---
 
@@ -32,163 +111,55 @@ Everything is organized into **memory banks** — one bank per user or agent.
 
 | Concept | What it is |
 |---------|------------|
-| **Bank** | Top-level memory container. Create one per user or agent. Has a `bank_id`, optional `reflect_mission`, and configuration. |
-| **Memory unit** | An extracted fact. Type is `world` (factual knowledge), `experience` (conversations/actions), or `observation` (synthesized via consolidation). |
-| **Document** | The source item passed to retain. Tracked for upsert: re-retaining with the same `document_id` replaces old facts. |
+| **Bank** | Top-level memory container. One per user or agent. Has a `bank_id`, optional `reflect_mission`, and configuration. |
+| **Memory unit** | An extracted fact. Type: `world` (factual knowledge), `experience` (conversations/actions), `observation` (synthesized via consolidation). |
+| **Document** | Source item passed to retain. Tracked for upsert: re-retaining with the same `document_id` replaces old facts. |
 | **Entity** | Named thing (person, org, place) auto-extracted and linked across memories. |
-| **Mental model** | A living document auto-generated by running a reflect query. Stays current after consolidation. |
-| **Directive** | A hard rule injected into LLM prompts during reflect. Used to steer behavior. |
+| **Mental model** | A living document auto-generated by a reflect query — stays current after consolidation. |
+| **Directive** | Hard rule injected into LLM prompts during reflect, to steer behavior. |
 | **Consolidation** | Async background process that distills raw memories into observations and refreshes mental models. |
-| **Tag** | String label for scoping/filtering. Filter with `any`, `all`, `any_strict`, or `all_strict`. |
+| **Tag** | String label for scoping/filtering across memory banks. |
 
 ---
 
-## Authentication
+## Retain — Detailed
 
-```python
-headers = {"authorization": "YOUR_API_KEY"}
-```
-
-All endpoints accept the `authorization` header. The cloud UI is at `https://ui.hindsight.vectorize.io`.
-
----
-
-## Bank Management
-
-### Create or update a bank
-
-```http
-PUT /v1/default/banks/{bank_id}
-```
-
-```json
-{
-  "reflect_mission": "You are a personal assistant for Alice. Use her memories to give helpful, personalized answers.",
-  "retain_mission": "Focus on technical decisions, preferences, and action items. Ignore pleasantries.",
-  "retain_extraction_mode": "concise"
-}
-```
-
-- `bank_id` is your identifier (e.g., `user_alice`, `agent_support_bot`)
-- `reflect_mission` guides how Reflect formulates answers
-- `retain_mission` steers what facts get extracted from content
-- `retain_extraction_mode`: `concise` (default), `verbose`, or `custom`
-- Use `retain_custom_instructions` with `custom` mode
-
-### List banks
-
-```http
-GET /v1/default/banks
-```
-
-### Delete a bank
-
-```http
-DELETE /v1/default/banks/{bank_id}
-```
-
-Destroys all memories and entities. Irreversible.
-
-### Bank configuration (fine-grained)
-
-```http
-PATCH /v1/default/banks/{bank_id}/config
-```
-
-```json
-{
-  "updates": {
-    "llm_model": "claude-sonnet-4-5",
-    "enable_observations": true,
-    "observations_mission": "Synthesize stable facts about the user's skills, preferences, and ongoing projects."
-  }
-}
-```
-
-GET the resolved config (global → tenant → bank) with:
-```http
-GET /v1/default/banks/{bank_id}/config
-```
-
----
-
-## Retain — Store Memories
-
-```http
-POST /v1/default/banks/{bank_id}/memories
-```
-
-```json
-{
-  "items": [
-    {
-      "content": "Alice mentioned she prefers TypeScript over JavaScript for large projects. She also said she's been burned by runtime type errors before.",
+```bash
+# Full options example
+curl -s -X POST "https://hindsight.vectorize.io/v1/default/banks/$BANK/memories" \
+  -H "authorization: $KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "items": [{
+      "content": "Alice said she prefers TypeScript over JavaScript for large projects after being burned by runtime type errors.",
       "context": "preferences conversation",
       "document_id": "chat_session_2024_01_15",
       "timestamp": "2024-01-15T10:30:00Z",
       "tags": ["preferences", "tech"]
-    }
-  ],
-  "async": false
-}
+    }],
+    "async": false
+  }'
 ```
 
 **Key fields:**
+
 | Field | Notes |
 |-------|-------|
-| `items[].content` | The text to extract facts from. Can be a whole conversation turn or document excerpt. |
-| `items[].context` | Human-readable label for the context (e.g., "work meeting", "onboarding"). |
-| `items[].document_id` | Enables **upsert**: re-retaining the same `document_id` replaces old memories from that document. |
-| `items[].timestamp` | ISO timestamp of when the event occurred (defaults to now). |
-| `items[].tags` | Tags applied to extracted memory units. Use for per-user scoping. |
-| `async` | `false` (default) = wait for extraction to finish. `true` = return `operation_id` immediately. |
+| `content` | Text to extract facts from. Can be a full conversation turn or document excerpt. |
+| `context` | Human-readable label for the context (e.g., "work meeting", "onboarding"). |
+| `document_id` | Enables **upsert**: re-retaining the same `document_id` replaces old memories from that document. Use stable IDs for things you'll update. |
+| `timestamp` | ISO timestamp of when the event occurred (defaults to now). |
+| `tags` | Labels for filtering in recall/reflect. Useful for scoping to specific users or topics. |
+| `async` | `false` (default) = wait for extraction. `true` = return `operation_id` and continue. |
 
-**Pattern — per-user tagging (recommended for multi-tenant apps):**
-```json
-{
-  "items": [{ "content": "...", "tags": ["user:alice"] }]
-}
-```
-Then recall with `"tags": ["user:alice"], "tags_match": "any_strict"` to scope to only that user's memories.
-
-**Pattern — upsert for updating documents:**
-Always pass a stable `document_id` when retaining documents you might update. On re-ingest, old facts are automatically removed.
+**Upsert pattern:** Pass a stable `document_id` for any content you might update later. Re-ingesting with the same ID automatically removes old facts.
 
 ---
 
-## Recall — Semantic Search
+## Recall — Detailed
 
-```http
-POST /v1/default/banks/{bank_id}/memories/recall
-```
+The response contains a `results` array of memory units:
 
-```json
-{
-  "query": "What programming languages does Alice prefer?",
-  "types": ["world", "experience"],
-  "budget": "mid",
-  "max_tokens": 2048,
-  "tags": ["user:alice"],
-  "tags_match": "any_strict",
-  "include": {
-    "entities": { "max_tokens": 500 }
-  }
-}
-```
-
-**Key fields:**
-| Field | Default | Notes |
-|-------|---------|-------|
-| `query` | required | Natural language question or topic |
-| `types` | `["world","experience"]` | Add `"observation"` to include synthesized facts |
-| `budget` | `"mid"` | `"low"` = fast/cheap, `"mid"` = balanced, `"high"` = thorough |
-| `max_tokens` | `4096` | Controls result volume |
-| `query_timestamp` | null | Temporal anchor — helps with "what did she say last week?" |
-| `tags` + `tags_match` | — | Scope to tagged memories |
-| `include.entities` | — | Include entity states (people, orgs, etc.) in response |
-| `trace` | `false` | Include execution trace for debugging |
-
-**Response:**
 ```json
 {
   "results": [
@@ -200,182 +171,187 @@ POST /v1/default/banks/{bank_id}/memories/recall
       "context": "preferences conversation",
       "occurred_start": "2024-01-15T10:30:00Z"
     }
-  ],
-  "entities": { "Alice": { "observations": [...] } }
+  ]
 }
 ```
+
+**Key query fields:**
+
+| Field | Default | Notes |
+|-------|---------|-------|
+| `query` | required | Natural language question or topic |
+| `types` | `["world","experience"]` | Add `"observation"` for synthesized facts |
+| `budget` | `"mid"` | `"low"` = fast/cheap, `"mid"` = balanced, `"high"` = thorough |
+| `max_tokens` | `4096` | Controls result volume |
+| `query_timestamp` | null | Temporal anchor for time-relative queries |
+| `tags` + `tags_match` | — | Scope to tagged memories (see tag filtering below) |
+| `include.entities` | — | Include entity states (people, orgs, etc.) in response |
 
 ---
 
-## Reflect — Memory-Grounded Q&A
+## Reflect — Detailed
 
-```http
-POST /v1/default/banks/{bank_id}/reflect
+Reflect runs an internal agent loop: it searches memories, then uses an LLM to synthesize an answer. Use it when you want Hindsight to do the synthesis rather than doing it yourself.
+
+**Optional: structured output**
+```bash
+curl -s -X POST "https://hindsight.vectorize.io/v1/default/banks/$BANK/reflect" \
+  -H "authorization: $KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "query": "What are the user'\''s technical preferences?",
+    "budget": "mid",
+    "include": { "facts": {} },
+    "response_schema": {
+      "type": "object",
+      "properties": {
+        "summary": { "type": "string" },
+        "preferences": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["summary", "preferences"]
+    }
+  }'
 ```
-
-```json
-{
-  "query": "What are Alice's technical preferences and what projects is she currently working on?",
-  "budget": "mid",
-  "tags": ["user:alice"],
-  "tags_match": "any_strict",
-  "include": { "facts": {} },
-  "response_schema": {
-    "type": "object",
-    "properties": {
-      "summary": { "type": "string" },
-      "preferences": { "type": "array", "items": { "type": "string" } }
-    },
-    "required": ["summary", "preferences"]
-  }
-}
-```
-
-Reflect runs an internal agent loop: it searches experience, world facts, and opinions, then uses an LLM to synthesize a contextual answer.
-
-**Key fields:**
-| Field | Default | Notes |
-|-------|---------|-------|
-| `query` | required | The question to answer using stored memory |
-| `budget` | `"low"` | Reflect default is `low`; bump to `mid` or `high` for complex questions |
-| `response_schema` | null | JSON Schema for structured output — adds `structured_output` to response |
-| `include.facts` | — | Include `based_on` evidence in response (what memories were used) |
-| `include.tool_calls` | — | Include full execution trace |
-| `fact_types` | all | Restrict which types are considered: `world`, `experience`, `observation` |
-| `exclude_mental_models` | `false` | Skip mental models if you don't want curated docs influencing the answer |
 
 **Response:**
 ```json
 {
-  "text": "## Alice's Technical Profile\n\nAlice strongly prefers **TypeScript**...",
-  "structured_output": { "summary": "...", "preferences": ["TypeScript", "..."] },
+  "text": "The user strongly prefers TypeScript...",
+  "structured_output": { "summary": "...", "preferences": ["TypeScript"] },
   "based_on": { "memories": [{ "id": "abc123", "text": "...", "type": "world" }] },
   "usage": { "input_tokens": 1500, "output_tokens": 300, "total_tokens": 1800 }
 }
+```
+
+**Key fields:**
+
+| Field | Default | Notes |
+|-------|---------|-------|
+| `budget` | `"low"` | Reflect default is `low`; use `mid`/`high` for complex questions |
+| `response_schema` | null | JSON Schema for structured output |
+| `include.facts` | — | Include `based_on` evidence (what memories were used) |
+| `fact_types` | all | Restrict: `world`, `experience`, `observation` |
+| `exclude_mental_models` | `false` | Skip mental models from influencing the answer |
+
+---
+
+## Bank Configuration
+
+Fine-grained config update:
+```bash
+curl -s -X PATCH "https://hindsight.vectorize.io/v1/default/banks/$BANK/config" \
+  -H "authorization: $KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "updates": {
+      "llm_model": "claude-sonnet-4-5",
+      "enable_observations": true,
+      "observations_mission": "Synthesize stable facts about the user'\''s skills, preferences, and ongoing projects."
+    }
+  }'
+```
+
+Read resolved config (global → tenant → bank):
+```bash
+curl -s "https://hindsight.vectorize.io/v1/default/banks/$BANK/config" \
+  -H "authorization: $KEY"
 ```
 
 ---
 
 ## Mental Models
 
-Mental models are living documents auto-generated by a reflect query and kept current after consolidation. Use them for entity profiles, project summaries, topic overviews, etc.
+Living documents auto-generated from a reflect query and kept current after consolidation. Use for entity profiles, project summaries, recurring topics.
 
-### Create a mental model
+```bash
+# Create
+curl -s -X POST "https://hindsight.vectorize.io/v1/default/banks/$BANK/mental-models" \
+  -H "authorization: $KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "name": "User Tech Preferences",
+    "source_query": "What are the user'\''s programming language preferences, tool choices, and technical opinions?",
+    "tags": ["preferences"],
+    "max_tokens": 1024,
+    "trigger": { "refresh_after_consolidation": true }
+  }'
 
-```http
-POST /v1/default/banks/{bank_id}/mental-models
-```
+# List (with content)
+curl -s "https://hindsight.vectorize.io/v1/default/banks/$BANK/mental-models?detail=content" \
+  -H "authorization: $KEY"
 
-```json
-{
-  "name": "Alice's Tech Preferences",
-  "source_query": "What are Alice's programming language preferences, tool choices, and technical opinions?",
-  "tags": ["user:alice", "preferences"],
-  "max_tokens": 1024,
-  "trigger": {
-    "refresh_after_consolidation": true,
-    "tags": ["user:alice"],
-    "tags_match": "any_strict"
-  }
-}
+# Refresh
+curl -s -X POST "https://hindsight.vectorize.io/v1/default/banks/$BANK/mental-models/$MODEL_ID/refresh" \
+  -H "authorization: $KEY"
 ```
 
 Content is generated asynchronously. Poll the returned `operation_id` to check when it's ready.
-
-### Refresh a mental model
-
-```http
-POST /v1/default/banks/{bank_id}/mental-models/{mental_model_id}/refresh
-```
-
-Returns `operation_id`. The model re-runs its `source_query` through reflect.
-
-### List mental models
-
-```http
-GET /v1/default/banks/{bank_id}/mental-models?detail=content
-```
-
-`detail` options: `metadata`, `content` (default), `full` (includes reflect evidence).
 
 ---
 
 ## Directives
 
-Hard rules injected into reflect prompts. Use to enforce output formats, personas, or behavioral constraints.
+Hard rules injected into reflect prompts. Enforce output formats, personas, or behavioral constraints.
 
-```http
-POST /v1/default/banks/{bank_id}/directives
+```bash
+curl -s -X POST "https://hindsight.vectorize.io/v1/default/banks/$BANK/directives" \
+  -H "authorization: $KEY" \
+  -H "content-type: application/json" \
+  -d '{
+    "name": "always-cite-sources",
+    "content": "Always cite the specific memory that informs each claim.",
+    "priority": 10,
+    "is_active": true
+  }'
 ```
 
-```json
-{
-  "name": "always-cite-sources",
-  "content": "Always cite the specific memory or fact that informs each claim in your response.",
-  "priority": 10,
-  "is_active": true
-}
-```
-
-Higher `priority` = injected first. Disable without deleting via `PATCH` with `is_active: false`.
+Higher `priority` = injected first. Disable without deleting: `PATCH` with `"is_active": false`.
 
 ---
 
 ## File Ingestion
 
-Convert files to memories (always async):
+For ingesting PDFs, DOCX, images, audio, etc., write a short Python script — `multipart/form-data` is awkward in curl:
 
-```http
-POST /v1/default/banks/{bank_id}/files/retain
-Content-Type: multipart/form-data
+```python
+import requests, sys
+
+bank, key, *files = sys.argv[1:]
+url = f"https://hindsight.vectorize.io/v1/default/banks/{bank}/files/retain"
+headers = {"authorization": key}
+
+file_handles = [("files", (f, open(f, "rb"))) for f in files]
+data = {"request": '{"async": true}'}
+
+resp = requests.post(url, headers=headers, files=file_handles, data=data)
+print(resp.json())
 ```
 
-Fields:
-- `files`: one or more binary files (PDF, DOCX, PPTX, XLSX, images, audio)
-- `request`: JSON string with retain options (tags, document_id, etc.)
+Run it: `python ingest.py $BANK $KEY document.pdf notes.docx`
 
-Returns `operation_ids`. Poll for completion.
+Returns `operation_ids`. Poll for completion (see Async Operations below).
 
 ---
 
 ## Async Operations
 
-When any operation is async, poll for status:
+Any endpoint can return an `operation_id` when `async: true`. Poll for status:
 
-```http
-GET /v1/default/banks/{bank_id}/operations/{operation_id}
+```bash
+curl -s "https://hindsight.vectorize.io/v1/default/banks/$BANK/operations/$OP_ID" \
+  -H "authorization: $KEY"
 ```
 
-Statuses: `pending`, `completed`, `failed`. Completed operations are removed from storage, so a `not_found` response after a short wait means it completed successfully.
+Statuses: `pending`, `completed`, `failed`. Note: completed operations are removed from storage, so a `404` after a short wait means it finished successfully.
 
-```http
-POST /v1/default/banks/{bank_id}/operations/{operation_id}/retry  # retry failed
-DELETE /v1/default/banks/{bank_id}/operations/{operation_id}      # cancel pending
-```
+```bash
+# Retry failed
+curl -s -X POST "https://hindsight.vectorize.io/v1/default/banks/$BANK/operations/$OP_ID/retry" \
+  -H "authorization: $KEY"
 
----
-
-## Webhooks
-
-Get notified after consolidation completes:
-
-```http
-POST /v1/default/banks/{bank_id}/webhooks
-```
-
-```json
-{
-  "url": "https://your-app.com/webhooks/hindsight",
-  "secret": "your-hmac-secret",
-  "event_types": ["consolidation.completed"],
-  "enabled": true
-}
-```
-
-Currently `consolidation.completed` is the only supported event type. Inspect delivery history:
-
-```http
-GET /v1/default/banks/{bank_id}/webhooks/{webhook_id}/deliveries
+# Cancel pending
+curl -s -X DELETE "https://hindsight.vectorize.io/v1/default/banks/$BANK/operations/$OP_ID" \
+  -H "authorization: $KEY"
 ```
 
 ---
@@ -389,62 +365,27 @@ GET /v1/default/banks/{bank_id}/webhooks/{webhook_id}/deliveries
 | `any_strict` | OR match, **excludes** untagged memories |
 | `all_strict` | AND match, **excludes** untagged memories |
 
-For complex filtering use `tag_groups`:
+For complex filtering, use `tag_groups`:
 ```json
 {
   "tag_groups": [
-    { "or": [{ "tags": ["user:alice"], "match": "any_strict" }, { "tags": ["shared"], "match": "any_strict" }] }
+    { "or": [
+      { "tags": ["user:alice"], "match": "any_strict" },
+      { "tags": ["shared"], "match": "any_strict" }
+    ]}
   ]
 }
 ```
 
 ---
 
-## Common Patterns
+## Monitoring & Health
 
-### Multi-tenant: one bank per user
-```python
-bank_id = f"user_{user_id}"
-# Always tag items with the user's tag
-# Always filter recall/reflect with that tag
-```
-
-### Conversational memory (per-session upsert)
-```python
-# Each message turn is a separate item, same document_id for the session
-# On session update, the old facts are replaced automatically
-retain(items=[{"content": turn, "document_id": session_id, "tags": ["user:alice"]}])
-```
-
-### Stateless recall → inject into LLM context
-```python
-memories = recall(query=user_message, budget="low", tags=["user:alice"])
-context = "\n".join(m["text"] for m in memories["results"])
-# Inject context into your LLM system prompt
-```
-
-### Full memory-grounded answer (no separate LLM call needed)
-```python
-response = reflect(query=user_message, budget="mid", tags=["user:alice"])
-return response["text"]  # Already an LLM-generated answer
-```
-
-### Observations for deep synthesis
-Enable on the bank to get distilled, stable facts beyond raw memories:
-```json
-PATCH /config → { "updates": { "enable_observations": true } }
-```
-Then include `"observation"` in recall `types` or reflect `fact_types`.
-
----
-
-## Monitoring & Stats
-
-```http
-GET /health                                    # health check
-GET /version                                   # API version + feature flags
-GET /v1/default/banks/{bank_id}/stats          # node/link/document counts, pending ops
-GET /metrics                                   # Prometheus metrics
+```bash
+curl -s "https://hindsight.vectorize.io/health"                              # health check
+curl -s "https://hindsight.vectorize.io/version"                             # API version + feature flags
+curl -s "https://hindsight.vectorize.io/v1/default/banks/$BANK/stats" \
+  -H "authorization: $KEY"                                                    # memory counts, pending ops
 ```
 
 ---

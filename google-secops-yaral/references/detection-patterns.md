@@ -177,6 +177,113 @@ process as child
 
 ---
 
+---
+
+## Pattern 4: Frequency / Baseline Analysis with Cross Join
+
+### Use Case
+
+Measure how frequently something occurs for each entity (user, host, process) and compare it against the population total. Identifies outliers without hardcoding thresholds — the data shapes the baseline.
+
+### Why Multi-Stage + Cross Join
+
+A single-stage query can count per-entity, but it can't simultaneously know the population total. The cross join solves this by:
+
+1. **Stage 1** — count per entity (many rows)
+2. **Stage 2** — count the full population (`limit: 1`, single row)
+3. **Root** — cross join broadcasts the population total to every per-entity row, enabling a percentage or ratio calculation
+
+### Key Constraint
+
+The `limit: 1` stage **must use the same filter logic** as the per-entity stage. If the base populations differ, the frequency calculation is meaningless.
+
+### Example: Login Frequency by User
+
+```yaral
+stage login_per_user {
+  metadata.event_type = "USER_LOGIN"
+  target.user.userid != ""
+  target.user.userid != /\$$/       // exclude machine accounts
+
+  $user   = target.user.userid
+  $action = security_result[0].action
+
+  match:
+    $user, $action
+  outcome:
+    $login_count = count(metadata.id)
+}
+
+stage login_total {
+  metadata.event_type = "USER_LOGIN"
+  target.user.userid != ""
+  target.user.userid != /\$$/       // same filter as stage 1
+
+  outcome:
+    $total_count = count(metadata.id)
+  limit:
+    1
+}
+
+cross join $login_per_user, $login_total
+$user        = $login_per_user.user
+$action      = $login_per_user.action
+$login_count = $login_per_user.login_count
+$total_count = $login_total.total_count
+match:
+  $user, $action, $login_count
+outcome:
+  $frequency_pct = max(math.round(($login_count / $total_count) * 100, 2))
+order:
+  $frequency_pct desc
+```
+
+**Why this is maintainable:**
+- No hardcoded thresholds — the baseline is the actual population in the search window
+- Surfacing the top consumers is a repeatable analytical pattern across any event type
+- Add `condition: $frequency_pct > 4` to filter for dashboard visualization
+
+### Variations
+
+**Host-based frequency (e.g., DNS request volume):**
+```yaral
+stage dns_per_host {
+  metadata.event_type = "NETWORK_DNS"
+  principal.hostname != ""
+  $host = principal.hostname
+  match: $host
+  outcome: $query_count = count(metadata.id)
+}
+
+stage dns_total {
+  metadata.event_type = "NETWORK_DNS"
+  outcome: $total = count(metadata.id)
+  limit: 1
+}
+
+cross join $dns_per_host, $dns_total
+$host        = $dns_per_host.host
+$query_count = $dns_per_host.query_count
+match: $host, $query_count
+outcome:
+  $pct = max(math.round(($query_count / $dns_total.total) * 100, 2))
+condition:
+  $pct > 5
+order:
+  $pct desc
+```
+
+### Building Multi-Stage Queries: Recommended Workflow
+
+Per the SecOps team:
+
+1. Write and run **Stage 1** alone — inspect rows and column values
+2. Write and run **Stage 2** alone — confirm it produces exactly one row
+3. Assemble the multi-stage search with `cross join`
+4. Add `condition:` and `order:` in the root stage after confirming the join is correct
+
+---
+
 ## General Best Practices for Maintainability
 
 1. **Use behavioral signals, not artifacts**
@@ -198,4 +305,9 @@ process as child
 5. **Avoid lists you can't maintain**
    - IOC lists go stale quickly
    - Behavioral rules adapt to adversary changes
+
+6. **For multi-stage searches: match your populations**
+   - Both stages in a cross join must filter the same base data
+   - Build each stage independently before assembling
+   - The `limit: 1` stage is the population denominator — protect its accuracy
 

@@ -5,20 +5,51 @@
 2. [Data Types and Fields](#data-types-and-fields)
 3. [Operators](#operators)
 4. [Functions](#functions)
-5. [Common Objects](#common-objects)
+5. [Common Objects (UDM Fields)](#common-objects-udm-fields)
 6. [Timeline Functions](#timeline-functions)
+7. [Multi-Stage Search](#multi-stage-search)
 
 ## YARAL Basics
 
 ### Query Structure
 
-YARAL queries follow this basic pattern:
+Single-stage search queries filter and aggregate events:
 
 ```yaral
-object_type
-| filter_condition
-| additional_filters
+metadata.event_type = "PROCESS_LAUNCH"
+$user = principal.user.userid
+$proc = target.process.file.full_path
+match:
+  $user, $proc
+outcome:
+  $count = count(metadata.id)
+order:
+  $count desc
 ```
+
+### Variable Placeholders
+
+Field values must be assigned to `$variables` before use in `match:` or `outcome:`:
+
+```yaral
+$user = target.user.userid        // assign field to variable
+$action = security_result[0].action  // array indexing then assign
+match:
+  $user, $action                  // group by these variables
+outcome:
+  $count = count(metadata.id)     // aggregate
+```
+
+### Query Sections
+
+| Section | Purpose | Required |
+|---------|---------|----------|
+| filters | Narrow the event set (before `match:`) | Yes |
+| `match:` | Group-by fields (placeholder variables) | For aggregations |
+| `outcome:` | Computed aggregates or derived fields | For aggregations |
+| `condition:` | Filter on aggregated results (post-aggregate WHERE) | No |
+| `order:` | Sort results | No |
+| `limit:` | Cap the number of output rows | No |
 
 ### Case Sensitivity
 
@@ -90,12 +121,19 @@ split(field, delimiter)        // Splits string into array
 ### Aggregation Functions
 
 ```yaral
-count()                 // Count of events
-count(distinct field)   // Count unique values
-min(numeric_field)      // Minimum value
-max(numeric_field)      // Maximum value
-sum(numeric_field)      // Sum of values
-avg(numeric_field)      // Average value
+count(metadata.id)          // Count of events
+count(distinct $field)      // Count unique values
+min($numeric_field)         // Minimum value
+max($numeric_field)         // Maximum value (also used to "select" a value in outcome)
+sum($numeric_field)         // Sum of values
+avg($numeric_field)         // Average value
+```
+
+### Math Functions
+
+```yaral
+math.round(value, decimals)    // Round to N decimal places
+                               // e.g. math.round(($count / $total) * 100, 2)
 ```
 
 ### Network Functions
@@ -106,43 +144,77 @@ ipv4InList(ip_field, list)              // Check if IP in list
 getCountry(ip_field)                    // Get country of IP
 ```
 
-## Common Objects
+### Array Indexing
 
-### Process Object
+Repeated fields (like `security_result`) are accessed by index:
 
 ```yaral
-process.pid                    // Process ID
-process.ppid                   // Parent process ID
-process.name                   // Process executable name
-process.command_line           // Full command line
-process.creation_time          // When process started
-process.user.user_name         // Username who started process
-process.image_file.name        // Path to executable
-process.working_directory      // Process working directory
+security_result[0].action          // First security result action
+security_result[0].severity        // First security result severity
 ```
 
-### Network Object
+## Common Objects (UDM Fields)
+
+Google SecOps uses the **Unified Data Model (UDM)**. Fields are prefixed by noun: `principal` (actor/source), `target` (acted-upon), `intermediary`, `src`, `dst`. Filter by `metadata.event_type` to scope to a specific event class.
+
+### Event Types
 
 ```yaral
-network_connection.src_ipv4    // Source IP
-network_connection.dst_ipv4    // Destination IP
-network_connection.src_port    // Source port
-network_connection.dst_port    // Destination port
-network_connection.protocol    // Protocol (tcp, udp, etc.)
-network_connection.created_time // When connection created
-network_connection.process_id  // PID that initiated connection
+metadata.event_type = "PROCESS_LAUNCH"
+metadata.event_type = "NETWORK_CONNECTION"
+metadata.event_type = "FILE_CREATION"
+metadata.event_type = "USER_LOGIN"
+metadata.event_type = "NETWORK_DNS"
 ```
 
-### File Object
+### Process Fields
 
 ```yaral
-file.name                      // Filename
-file.path                      // Full file path
-file.creation_time             // File creation time
-file.modified_time             // Last modified time
-file.size                      // File size in bytes
-file.md5                       // MD5 hash
-file.sha256                    // SHA256 hash
+// Actor process (initiating)
+principal.process.pid                      // Process ID
+principal.process.file.full_path           // Full path to executable
+principal.process.command_line             // Full command line
+principal.process.parent_process.pid       // Parent PID
+principal.user.userid                      // User who owns the process
+
+// Target process (spawned)
+target.process.pid
+target.process.file.full_path
+target.process.command_line
+```
+
+### Network Fields
+
+```yaral
+principal.ip                   // Source IP
+target.ip                      // Destination IP
+principal.port                 // Source port
+target.port                    // Destination port
+network.ip_protocol            // Protocol (TCP, UDP, etc.)
+principal.hostname             // Source hostname
+target.hostname                // Destination hostname
+```
+
+### File Fields
+
+```yaral
+target.file.full_path          // Full file path
+target.file.md5                // MD5 hash
+target.file.sha256             // SHA256 hash
+target.file.size               // File size in bytes
+```
+
+### Auth / User Login Fields
+
+```yaral
+metadata.event_type = "USER_LOGIN"
+target.user.userid             // User attempting login
+target.user.user_display_name  // Display name
+principal.hostname             // Source machine
+target.hostname                // Target machine
+security_result[0].action      // ALLOW or BLOCK
+security_result[0].severity    // Severity of result
+metadata.id                    // Unique event ID (use for count())
 ```
 
 ## Timeline Functions
@@ -194,38 +266,100 @@ process
 | all_of(childprocess) where childprocess.name == "powershell.exe"
 ```
 
-## Authentication Object
+## Multi-Stage Search
 
-### Fields
+Multi-stage searches let you build named intermediate result sets and combine them in a root stage. This is the mechanism for population-level analysis, frequency scoring, outlier detection, and cross-dataset correlation.
 
-```yaral
-authentication.type              // Auth type (e.g., "INTERACTIVE", "NETWORK")
-authentication.status            // Success/failure status
-authentication.user.user_name    // Username attempting authentication
-authentication.user.domain       // User's domain
-authentication.target_host       // Target machine for auth
-authentication.source_host       // Source machine initiating auth
-authentication.logon_id          // Unique session identifier
-authentication.timestamp         // When authentication occurred
-```
-
-### Example: Failed Auth Spray Detection
+### Stage Block Syntax
 
 ```yaral
-authentication
-| authentication.status == "FAILURE"
-| within 5m: authentication as a
-| count(distinct a.user.user_name) >= 10
-  // 10+ different users failing auth = password spray
+stage stage_name {
+  // filter conditions
+  metadata.event_type = "USER_LOGIN"
+  target.user.userid != ""
+
+  // variable assignments
+  $user   = target.user.userid
+  $action = security_result[0].action
+
+  match:
+    $user, $action           // group-by
+
+  outcome:
+    $count = count(metadata.id)
+
+  // optional
+  condition:
+    $count > 5
+  order:
+    $count desc
+  limit:
+    100
+}
 ```
 
-### Example: Lateral Auth Chain
+### Cross Join
+
+A cross join combines two stages **without a shared key** — it produces a Cartesian product. In Google SecOps, cross joins are guardrailed: **one of the two stages must output exactly one row** (enforced via `limit: 1`), otherwise the query returns an error:
+
+```
+compilation error: at least one operand in a cross join must be a stage that outputs at most one row
+```
+
+The one-row stage acts as a "broadcast" — its single value is appended to every row from the other stage, enabling per-row calculations against a population aggregate.
 
 ```yaral
-authentication
-| authentication.type == "NETWORK"
-| authentication.status == "SUCCESS"
-| within 10m: authentication as a2
-  where a2.source_host == authentication.target_host
-  // Successful auth followed by auth FROM that target = lateral movement
+stage per_user {
+  metadata.event_type = "USER_LOGIN"
+  target.user.userid != ""
+  $user   = target.user.userid
+  $action = security_result[0].action
+  match:
+    $user, $action
+  outcome:
+    $login_count = count(metadata.id)
+}
+
+stage population_total {
+  metadata.event_type = "USER_LOGIN"
+  target.user.userid != ""
+  outcome:
+    $total_count = count(metadata.id)
+  limit:
+    1                        // required for cross join
+}
+
+// Root stage assembles the result
+cross join $per_user, $population_total
+$user        = $per_user.user
+$action      = $per_user.action
+$login_count = $per_user.login_count
+$total_count = $population_total.total_count
+match:
+  $user, $action, $login_count
+outcome:
+  $frequency_pct = max(math.round(($login_count / $total_count) * 100, 2))
+order:
+  $frequency_pct desc
 ```
+
+### Cross Join Rules
+
+- `cross join $stage_a, $stage_b` — command syntax, stage names separated by comma
+- One stage **must** have `limit: 1`
+- Both stages should filter the **same base population** so the comparison is apples-to-apples
+- The root stage's output is determined by its own `match:` and `outcome:` sections
+- Fields from named stages are referenced as `$stage_name.field_name`
+
+### When to Use Multi-Stage Search
+
+| Use Case | Approach |
+|----------|----------|
+| Frequency analysis | Per-entity count vs. population total via cross join |
+| Outlier / z-score detection | Per-entity stats + population mean/stdev via cross join |
+| Time-window bucketing | Named stages per time bucket, joined in root |
+| Enrichment | One stage produces a lookup value; cross join appends it |
+
+### Building Multi-Stage Queries
+
+Best practice (from the SecOps team): **build and validate each named stage independently first**, inspect its output, then assemble the multi-stage search. This makes it far easier to debug which stage produces unexpected results.

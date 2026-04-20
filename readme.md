@@ -1,3 +1,6 @@
+---
+description: Index of skills
+---
 # Agent Skills
 
 A collection of specialized skills that provide domain-specific instructions and workflows for Claude.

@@ -130,6 +130,7 @@ angr's decompiler is competitive with Ghidra on small functions; it churns more 
 
 - **State explosion** is the #1 failure mode. Symptoms: script eats RAM, never returns. Fixes: tighter `avoid` set, hook expensive functions with stubs, start later in the binary, use `veritesting=True` on the simulation manager, or switch to `LAZY_SOLVES`.
 - **Unconstrained successors** mean angr lost track of PC (often: jump through symbolic pointer). Inspect `sm.unconstrained`. Usually means you need to hook the function or supply concrete state.
+- **Suspiciously clean answers (0, all-zeros, default values).** If `state.solver.eval(sym)` returns `0` or another suspiciously round value for a non-trivial check, the symbol probably wasn't actually constrained by the path — the solver picked an arbitrary value because nothing forced it otherwise. Common causes: you wrote the symbol to the wrong memory location, the explored path never actually read your symbol, or `find=` was reached through a path that bypassed the check entirely. **Sanity check by reading the disassembly:** does the value you got cause the cmp/check to take the success branch? If not, your harness is wrong, not the binary.
 - **`auto_load_libs=True` + glibc** loads ~30MB of ELF and runs ld.so symbolically. Almost never what you want.
 - **Fork bombs in loops.** A symbolic loop counter forks once per iteration. Concretize the counter or unroll with a hook.
 - **angr is slow to import** (~2s). Bundle multiple queries into one script.

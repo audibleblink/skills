@@ -166,11 +166,12 @@ Use `afn` to rename functions and `CCa` to add comments so the session stays use
 ## Common Scenarios
 
 ### CTF binary
-1. `iI` — check protections (PIE, NX, canary)
-2. `iz~flag` — search for flag format strings  
-3. `afl~main` → `pdf @ sym.main` — find the logic
-4. `pdc` for pseudo-C if available
-5. Look for `strcmp`, `memcmp`, crypto functions in imports
+1. `iI` — check protections (PIE, NX, canary), and note if **stripped**
+2. `iz~flag,correct,wrong,success,denied,password` — multi-keyword search for win/lose strings (rizin's `~` accepts comma-separated patterns; one round-trip beats N)
+3. **String-xref pivot** (works on stripped binaries where `sym.main` doesn't exist): take an interesting string's address from step 2 and run `axt @ <addr>` to find the function that references it. That's almost always your check function.
+4. `pdf @ fcn.<addr>` — disassemble. If it errors with *"Linear size differs too much from the bbsum"*, swap to `pdr` (recursive disasm that follows control flow). Same output, handles non-contiguous functions.
+5. `pdc` for pseudo-C if available
+6. Look for `strcmp`, `memcmp`, crypto functions in imports
 
 ### Malware sample
 1. `ii` — suspicious imports (CreateRemoteThread, VirtualAlloc, WSAStartup, etc.)

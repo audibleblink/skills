@@ -1,12 +1,11 @@
 ---
 name: hindsight-memory-api
 description: >
-  Store, retrieve, and reflect on agentic memories via the Hindsight API
-  (hindsight.vectorize.io). Use for persistent cross-session memory —
-  conversation history, fact recall, memory-grounded answers, per-user memory
-  banks. Triggers: Hindsight, memory banks, retain/recall/reflect, agent
-  memory, vectorize.io, making a chatbot "remember" across sessions, long-term
-  AI context, or storing document knowledge in a searchable memory store.
+  Store, retrieve, and reflect on agentic memories via the Hindsight API. 
+  Use for persistent cross-session memory — conversation history, fact recall,
+  memory-grounded answers, per-user memory banks. Triggers: remember: ,
+  retain/recall/reflect, agent memory, or storing document knowledge in
+  a searchable memory store. 
 ---
 
 # Hindsight Memory API — Agent Operations Guide

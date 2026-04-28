@@ -1,6 +1,6 @@
 ---
 name: notebooklm
-description: Automate Google NotebookLM to create AI-generated podcasts, audio overviews, study guides, FAQs, briefing docs, and deep dive analyses from sources like YouTube videos, PDFs, URLs, audio files, and images. ALWAYS use this skill when the user wants to "create a podcast", "make an audio overview", "generate a study guide", or turn content into a conversational audio format with AI hosts. Also triggers on "notebooklm", "audio briefing", "podcast about", "deep dive from", or requests to chat with/query multiple documents as a unified knowledge base. Does NOT apply to simple transcription, TTS, audio editing, or basic summarization.
+description: Automate Google NotebookLM to generate AI podcasts, audio overviews, study guides, FAQs, briefing docs, and deep dives from YouTube, PDFs, URLs, audio, and images. Use for "create a podcast", "audio overview", "study guide", conversational AI-host audio, or chatting/querying multiple documents as one knowledge base. Triggers - "notebooklm", "audio briefing", "podcast about", "deep dive from". NOT for plain transcription, TTS, audio editing, or basic summarization.
 ---
 <!-- notebooklm-py v0.3.2 -->
 

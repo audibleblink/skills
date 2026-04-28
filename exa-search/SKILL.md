@@ -1,6 +1,6 @@
 ---
 name: exa-search
-description: Search the web with Exa's neural search API via curl. Use this skill whenever the user wants to search the web, research a topic, find up-to-date information, look up articles/papers/companies/people, fetch clean page contents from URLs, or get an LLM-generated answer with citations — especially when they mention "exa", "search the web", "look this up", "find me articles about", "what's the latest on", "get the text of this page", or ask a factual question that needs fresh sources. Prefer this over generic web_fetch when the user wants ranked/semantic results or structured contents. Auth uses the local `op` CLI to read the API key from 1Password (`op://infra/exa/token`).
+description: Search the web with Exa's neural search API via curl. Use when the user wants to search the web, research a topic, find articles/papers/companies/people, fetch clean page contents from URLs, or get an LLM answer with citations — including triggers like "exa", "search the web", "look this up", "latest on", or factual questions needing fresh sources. Prefer over generic web_fetch for ranked/semantic results. Auth via `op` CLI (`op://infra/exa/token`).
 ---
 
 # Exa Search

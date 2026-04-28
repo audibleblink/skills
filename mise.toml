@@ -1,8 +1,7 @@
 [tasks."update-readme"]
 description = "Update README.md with skill descriptions from SKILL.md frontmatter"
 run = '''
-opencode run \
-  --title "Update README skill descriptions" \
+pi -p \
   "Update the README.md with descriptions from all skills in this repo." \
   "Find every SKILL.md file, extract the name and description from the YAML frontmatter," \
   "and regenerate the '## Available Skills' section in README.md." \

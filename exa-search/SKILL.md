@@ -1,6 +1,6 @@
 ---
 name: exa-search
-description: Search the web with Exa's neural search API via curl. Use when the user wants to search the web, research a topic, find articles/papers/companies/people, fetch clean page contents from URLs, or get an LLM answer with citations — including triggers like "exa", "search the web", "look this up", "latest on", or factual questions needing fresh sources. Prefer over generic web_fetch for ranked/semantic results. Auth via `op` CLI (`op://infra/exa/token`).
+description: Search the web with Exa's neural search API via curl. Use when the user wants to search the web, fetch clean page contents from URLs, or get an LLM answer with citations — including triggers like "exa", "search the web", "look this up", "latest on", or factual questions needing fresh sources. Auth via `op` CLI (`op://infra/exa/token`).
 ---
 
 # Exa Search
